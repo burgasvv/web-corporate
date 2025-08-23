@@ -33,8 +33,8 @@ public class OfficeFilterFunction implements HandlerFilterFunction<ServerRespons
     @Override
     public @NotNull ServerResponse filter(@NotNull ServerRequest request, @NotNull HandlerFunction<ServerResponse> next) throws Exception {
         if (
-                request.path().equals("/api/v1/offices/create") ||
-                request.path().equals("/api/v1/offices/update")
+                request.path().equals("/api/v1/offices/create") || request.path().equals("/api/v1/offices/create/async") ||
+                request.path().equals("/api/v1/offices/update") || request.path().equals("/api/v1/offices/update/async")
         ) {
             Authentication authentication = request.principal()
                     .map(Authentication.class::cast)
@@ -59,7 +59,9 @@ public class OfficeFilterFunction implements HandlerFilterFunction<ServerRespons
                 throw new IdentityNotAuthenticatedException(IdentityMessages.IDENTITY_NOT_AUTHENTICATED.getMessage());
             }
 
-        } else if (request.path().equals("/api/v1/offices/delete")) {
+        } else if (
+                request.path().equals("/api/v1/offices/delete") || request.path().equals("/api/v1/offices/delete/async")
+        ) {
             Authentication authentication = request.principal()
                     .map(Authentication.class::cast)
                     .orElseThrow();

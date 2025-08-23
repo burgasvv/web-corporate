@@ -37,11 +37,30 @@ public class OfficeRouter {
                                         )
                 )
                 .GET(
+                        "/api/v1/offices/by-corporation/async", request ->
+                                ServerResponse
+                                        .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(
+                                                officeService.findByCorporationIdAsync(
+                                                                UUID.fromString(request.param("corporationId").orElseThrow())
+                                                        )
+                                                        .get()
+                                        )
+                )
+                .GET(
                         "/api/v1/offices/by-id", request ->
                                 ServerResponse
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(officeService.findById(request.body(OfficePK.class)))
+                )
+                .GET(
+                        "/api/v1/offices/by-id/async", request ->
+                                ServerResponse
+                                        .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(officeService.findByIdAsync(request.body(OfficePK.class)).get())
                 )
                 .POST(
                         "/api/v1/offices/create", request ->
@@ -52,6 +71,18 @@ public class OfficeRouter {
                                                 officeService.createOrUpdate(
                                                         (OfficeRequest) request.attribute("officeRequest").orElseThrow()
                                                 )
+                                        )
+                )
+                .POST(
+                        "/api/v1/offices/create/async", request ->
+                                ServerResponse
+                                        .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(
+                                                officeService.createOrUpdateAsync(
+                                                                (OfficeRequest) request.attribute("officeRequest").orElseThrow()
+                                                        )
+                                                        .get()
                                         )
                 )
                 .PUT(
@@ -65,6 +96,18 @@ public class OfficeRouter {
                                                 )
                                         )
                 )
+                .PUT(
+                        "/api/v1/offices/update/async", request ->
+                                ServerResponse
+                                        .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(
+                                                officeService.createOrUpdateAsync(
+                                                                (OfficeRequest) request.attribute("officeRequest").orElseThrow()
+                                                        )
+                                                        .get()
+                                        )
+                )
                 .DELETE(
                         "/api/v1/offices/delete", request ->
                                 ServerResponse
@@ -74,6 +117,18 @@ public class OfficeRouter {
                                                 officeService.delete(
                                                         (OfficePK) request.attribute("officePK").orElseThrow()
                                                 )
+                                        )
+                )
+                .DELETE(
+                        "/api/v1/offices/delete/async", request ->
+                                ServerResponse
+                                        .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(
+                                                officeService.deleteAsync(
+                                                                (OfficePK) request.attribute("officePK").orElseThrow()
+                                                        )
+                                                        .get()
                                         )
                 )
                 .onError(

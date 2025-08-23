@@ -50,7 +50,8 @@ public class SecurityConfig {
                                         "/api/v1/corporations", "/api/v1/corporations/by-id",
                                         "/api/v1/corporations/async", "/api/v1/corporations/by-id/async",
 
-                                        "/api/v1/offices/by-corporation", "/api/v1/offices/by-id"
+                                        "/api/v1/offices/by-corporation", "/api/v1/offices/by-corporation/async",
+                                        "/api/v1/offices/by-id", "/api/v1/offices/by-id/async"
                                 )
                                 .permitAll()
 
@@ -96,7 +97,9 @@ public class SecurityConfig {
                                         "/api/v1/corporations/create/async", "/api/v1/corporations/update/async",
                                         "/api/v1/corporations/delete/async", "/api/v1/corporations/add-director/async",
 
-                                        "/api/v1/offices/create", "/api/v1/offices/update", "/api/v1/offices/delete"
+                                        "/api/v1/offices/create", "/api/v1/offices/create/async",
+                                        "/api/v1/offices/update", "/api/v1/offices/update/async",
+                                        "/api/v1/offices/delete", "/api/v1/offices/delete/async"
                                 )
                                 .hasAnyAuthority(DIRECTOR.getAuthority())
 
