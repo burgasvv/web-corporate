@@ -1,0 +1,26 @@
+
+server:
+  port: 9000
+spring:
+  application:
+    name: corporate-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:6000/corporate_service_db
+    username: postgres
+    password: postgres
+  jpa:
+    database: postgresql
+    open-in-view: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        use_sql_comments: true
+        format_sql: true
+        highlight_sql: true
+logging:
+  level:
+    org.springframework.transaction.interceptor: TRACE

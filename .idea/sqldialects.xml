@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/java/org/burgas/corporateservice/repository/EmployeeRepository.java" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/java/org/burgas/corporateservice/repository/OfficeRepository.java" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-17--0001-create-media.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-17--0002-create-identity.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-20--0003-create-corporation.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-20--0004-create-address.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-20--0005-create-office.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-20--0006-create-employee.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/populate/2025-08-18--0002-insert-identity.sql" dialect="PostgreSQL" />
+  </component>
+</project>

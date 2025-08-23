@@ -1,0 +1,266 @@
+### Security Requests
+
+
+
+###
+GET /api/v1/security/csrf-token
+Host: localhost:8765
+Accept: application/json
+
+
+
+### Identity Requests
+
+
+
+### Sync
+GET /api/v1/identities
+Host: localhost:8765
+Accept: application/json
+Authorization: Basic admin@gmail.com admin
+
+### Async
+GET /api/v1/identities/async
+Host: localhost:8765
+Accept: application/json
+Authorization: Basic admin@gmail.com admin
+
+### Sync
+GET /api/v1/identities/by-id?identityId=79c29119-72ae-46cf-86de-3e89531b3234
+Host: localhost:8765
+Accept: application/json
+Authorization: Basic user@gmail.com user
+
+### Async
+GET /api/v1/identities/by-id/async?identityId=4f9a5aa2-419d-4e83-a7aa-d1b78e52d243
+Host: localhost:8765
+Accept: application/json
+Authorization: Basic admin@gmail.com admin
+
+### Sync
+POST /api/v1/identities/create
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+X-Csrf-Token: j6VaCotRAT4VMMEtLqoPR1kSxC0F48QUBX9fSw6Cr8J3_OpJ7sNtaehjYAg4AvhIGIc7Jj936RUzgvE5NU5vfjmzmvUSztgv
+
+{
+    "username": "user",
+    "password": "user",
+    "email": "user@gmail.com",
+    "phone": "+7(999)-496-48-92"
+}
+
+### Async
+POST /api/v1/identities/create/async
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+X-Csrf-Token: V3fOV_ohEdRtsIsxufCXxW7izzk9BX_Xtvwx188VldkHPvUUNkD4ZJ8TIbVA1rMG2N2j81qG4gBcNEv60MRU4_x3rOhkWJYi
+
+{
+    "username": "director",
+    "password": "director",
+    "email": "director@gmail.com",
+    "phone": "+7(888)-523-45-75"
+}
+
+### Sync
+PUT /api/v1/identities/update
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+
+{
+    "id": "7218b1f9-f657-4cd1-8ad2-3195ce92ebae",
+    "phone": "+7(555)-449-25-35"
+}
+
+### Async
+PUT /api/v1/identities/update/async
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+
+{
+    "id": "d5ea75c9-f481-49a5-a33f-27b3901ccd82",
+    "phone": "+7(999)-485-85-29"
+}
+
+### Sync
+DELETE /api/v1/identities/delete?identityId=7218b1f9-f657-4cd1-8ad2-3195ce92ebae
+Host: localhost:8765
+Accept: text/plain
+
+### Async
+DELETE /api/v1/identities/delete/async?identityId=ffa40936-a077-4d38-9b45-92a63668138f
+Host: localhost:8765
+Accept: text/plain
+
+### Sync
+PATCH /api/v1/identities/change-password?identityId=79c29119-72ae-46cf-86de-3e89531b3234
+Host: localhost:8765
+Content-Type: application/json
+Authorization: Basic user@gmail.com user
+X-Csrf-Token: 3XsEF3yjz9syb92vt6v4ngZL_8ylDMmxhz0pvKT2b5bGfxwF7Us1ck2T9r4fVridgYbM-mct0vTBaqqc4ghNi5zBXaTxGiVh
+
+{
+    "password": "user111"
+}
+
+### Async
+PUT /api/v1/identities/make-director/async?identityId=a8f6f648-dbd1-4021-97fe-7e56c93bb76c
+Host: localhost:8765
+Accept: application/json
+Authorization: Basic director@gmail.com director
+X-Csrf-Token: V3fOV_ohEdRtsIsxufCXxW7izzk9BX_Xtvwx188VldkHPvUUNkD4ZJ8TIbVA1rMG2N2j81qG4gBcNEv60MRU4_x3rOhkWJYi
+
+
+
+### Corporation requests
+
+
+
+### Sync
+PUT /api/v1/corporations/add-director?
+    corporationId=3eb603e8-8f74-43cb-ac8b-a4edd29f30cf&alreadyDirector=a0f65d48-15ae-4f3c-a0f7-7afd137e3c49&newDirector=bae9e303-8ff0-4bbe-ba0f-053ba344e9c8
+Host: localhost:8765
+Accept: text/plain
+Authorization: Basic director@gmail.com director
+X-Csrf-Token: jlIfkzFe0M8DTF52XzGQvqF-CQaGiqWT-M4auuyd9q-GWXNj72Qs8gE7sfgudDtAaxyk35hOJGe365S-wfh8jtX4lMuxYRBW
+
+### Sync
+POST /api/v1/corporations/create
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+Authorization: Basic director@gmail.com director
+X-Csrf-Token: V3fOV_ohEdRtsIsxufCXxW7izzk9BX_Xtvwx188VldkHPvUUNkD4ZJ8TIbVA1rMG2N2j81qG4gBcNEv60MRU4_x3rOhkWJYi
+
+{
+    "name": "TeleSET Corp.",
+    "description": "Описание корпорации TeleSET Corp.",
+    "directorId": "a8f6f648-dbd1-4021-97fe-7e56c93bb76c"
+}
+
+### Sync
+GET /api/v1/corporations
+Host: localhost:8765
+Accept: application/json
+
+### Sync
+GET /api/v1/corporations/by-id?corporationId=3eb603e8-8f74-43cb-ac8b-a4edd29f30cf
+Host: localhost:8765
+Accept: application/json
+
+
+
+### Office Requests
+
+
+
+###
+GET /api/v1/offices/by-corporation?corporationId=dc088f82-db57-4bb1-9290-ea4ea4bedd90
+Host: localhost:8765
+Accept: application/json
+
+###
+GET /api/v1/offices/by-id
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+
+{
+    "corporationId": "dc088f82-db57-4bb1-9290-ea4ea4bedd90",
+    "addressId": "65e4db09-27cb-413d-b4ea-0d3912b31a62"
+}
+
+###
+POST /api/v1/offices/create
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+Authorization: Basic director@gmail.com director
+X-Csrf-Token: MsV8EW17PdCGNlgAaWWbI_G983V-Bin12mA2bxDOswZbzoagU_JKIghJDbGrUGA3CEivFcXZ3kwfNx3YvFhTWyOsijc4qOWW
+
+{
+    "office": {
+        "corporationId": "dc088f82-db57-4bb1-9290-ea4ea4bedd90"
+    },
+    "newAddress": {
+        "country": "Российская Федерация",
+        "city": "Новосибирск",
+        "street": "ул. Российская",
+        "house": "15/1"
+    }
+}
+
+###
+PUT /api/v1/offices/update
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+Authorization: Basic director@gmail.com director
+X-Csrf-Token: _-AFIs9c0CL3T5Pv1MLrgY4GaAMj5hEB9IbmMYkB9t2qaxgintczEapu4EPaKavYte_ft7piRTpC1yUskr6DBbpjz-zJDXsU
+
+{
+    "office": {
+        "corporationId": "dc088f82-db57-4bb1-9290-ea4ea4bedd90",
+        "addressId": "65e4db09-27cb-413d-b4ea-0d3912b31a62"
+    },
+    "newAddress": {
+        "country": "КНДР",
+        "city": "Шанхай",
+        "street": "ул. Киндзяо",
+        "house": "245"
+    }
+}
+
+
+
+### Employee Requests
+
+###
+GET /api/v1/employees/by-corporation?corporationId=dc088f82-db57-4bb1-9290-ea4ea4bedd90
+Host: localhost:8765
+Accept: application/json
+Authorization: Basic director@gmail.com director
+
+###
+GET /api/v1/employees/by-office
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+Authorization: Basic director@gmail.com director
+
+{
+    "corporationId": "dc088f82-db57-4bb1-9290-ea4ea4bedd90",
+    "addressId": "01da468f-d60e-413b-b3a4-c1780530dd78"
+}
+
+###
+POST /api/v1/employees/create
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+Authorization: Basic director@gmail.com director
+X-Csrf-Token: QGJQzjeimBgLJP9N9KAd1lck6NcFPKpBVLAtYyxG6Ng1uXRXclA2qw_E_iomHZwrlo0p4TMQxe41BMhsbdQfAR122-1XgUxh
+
+{
+    "identityId": "a8f6f648-dbd1-4021-97fe-7e56c93bb76c",
+    "firstName": "Палышев",
+    "lastName": "Аркадий",
+    "patronymic": "Викторович",
+    "about": "Описание сотрудника и должность",
+    "address": {
+        "country": "Российская Федерация",
+        "city": "Москва",
+        "street": "ул. Мясницкая",
+        "house": "125/4",
+        "apartment": "54"
+    },
+    "office": {
+        "corporationId": "dc088f82-db57-4bb1-9290-ea4ea4bedd90",
+        "addressId": "01da468f-d60e-413b-b3a4-c1780530dd78"
+    }
+}
