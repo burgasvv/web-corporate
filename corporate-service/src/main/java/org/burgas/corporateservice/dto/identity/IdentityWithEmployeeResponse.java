@@ -2,7 +2,7 @@ package org.burgas.corporateservice.dto.identity;
 
 import lombok.*;
 import org.burgas.corporateservice.dto.Response;
-import org.burgas.corporateservice.dto.employee.EmployeeWithOfficeResponse;
+import org.burgas.corporateservice.dto.employee.EmployeeNoIdentityResponse;
 import org.burgas.corporateservice.entity.Authority;
 import org.burgas.corporateservice.entity.Media;
 
@@ -22,6 +22,6 @@ public final class IdentityWithEmployeeResponse extends Response {
     private String email;
     private String phone;
     private Boolean enabled;
-    private EmployeeWithOfficeResponse employee;
+    private EmployeeNoIdentityResponse employee;
     private Media image;
 }

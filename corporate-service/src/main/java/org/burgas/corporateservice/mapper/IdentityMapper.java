@@ -67,7 +67,7 @@ public final class IdentityMapper implements EntityMapper<IdentityRequest, Ident
                 .enabled(identity.getEnabled())
                 .employee(
                         Optional.ofNullable(identity.getEmployee())
-                                .map(this.employeeMapper::toResponse)
+                                .map(this.employeeMapper::toEmployeeNoIdentityResponse)
                                 .orElse(null)
                 )
                 .image(identity.getImage())

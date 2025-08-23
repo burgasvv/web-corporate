@@ -1,6 +1,7 @@
 package org.burgas.corporateservice.mapper;
 
 import lombok.RequiredArgsConstructor;
+import org.burgas.corporateservice.dto.employee.EmployeeNoIdentityResponse;
 import org.burgas.corporateservice.dto.employee.EmployeeRequest;
 import org.burgas.corporateservice.dto.employee.EmployeeWithOfficeResponse;
 import org.burgas.corporateservice.dto.identity.IdentityWithoutEmployeeResponse;
@@ -12,6 +13,7 @@ import org.burgas.corporateservice.exception.OfficeNotFoundException;
 import org.burgas.corporateservice.mapper.contract.EntityMapper;
 import org.burgas.corporateservice.repository.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -154,20 +156,34 @@ public final class EmployeeMapper implements EntityMapper<EmployeeRequest, Emplo
                 .patronymic(employee.getPatronymic())
                 .about(employee.getAbout())
                 .address(employee.getAddress())
-                .office(
-                        Optional.ofNullable(employee.getOffice())
-                                .map(
-                                        office -> OfficeWithoutEmployeesResponse.builder()
-                                                .address(this.addressRepository.findById(office.getOfficePK().getAddressId()).orElse(null))
-                                                .corporation(
-                                                        this.corporationRepository.findById(office.getOfficePK().getCorporationId())
-                                                                .map(this.corporationMapper::toResponse)
-                                                                .orElse(null)
-                                                )
-                                                .build()
-                                )
-                                .orElse(null)
-                )
+                .office(getOffice(employee))
                 .build();
+    }
+
+    public EmployeeNoIdentityResponse toEmployeeNoIdentityResponse(Employee employee) {
+        return EmployeeNoIdentityResponse.builder()
+                .id(employee.getId())
+                .firstName(employee.getFirstName())
+                .lastName(employee.getLastName())
+                .patronymic(employee.getPatronymic())
+                .about(employee.getAbout())
+                .address(employee.getAddress())
+                .office(getOffice(employee))
+                .build();
+    }
+
+    private @Nullable OfficeWithoutEmployeesResponse getOffice(Employee employee) {
+        return Optional.ofNullable(employee.getOffice())
+                .map(
+                        office -> OfficeWithoutEmployeesResponse.builder()
+                                .address(this.addressRepository.findById(office.getOfficePK().getAddressId()).orElse(null))
+                                .corporation(
+                                        this.corporationRepository.findById(office.getOfficePK().getCorporationId())
+                                                .map(this.corporationMapper::toResponse)
+                                                .orElse(null)
+                                )
+                                .build()
+                )
+                .orElse(null);
     }
 }
