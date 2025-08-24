@@ -196,6 +196,26 @@ X-Csrf-Token: MsV8EW17PdCGNlgAaWWbI_G983V-Bin12mA2bxDOswZbzoagU_JKIghJDbGrUGA3CE
 }
 
 ###
+POST /api/v1/offices/create
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+Authorization: Basic director@gmail.com director
+X-Csrf-Token: kTl4RP2suvVyZ0AaV-IPq0LLWmNztQIgKcaUvDtZYvvRUHW9oAtNfcuciMRfUSUsYc87nyCtd1tBgzINH6Ctjl4_Us_gMRTZ
+
+{
+    "office": {
+        "corporationId": "dc088f82-db57-4bb1-9290-ea4ea4bedd90"
+    },
+    "newAddress": {
+        "country": "Российская Федерация",
+        "city": "Владивосток",
+        "street": "ул. Морская",
+        "house": "56"
+    }
+}
+
+###
 PUT /api/v1/offices/update
 Host: localhost:8765
 Accept: application/json
@@ -263,4 +283,17 @@ X-Csrf-Token: QGJQzjeimBgLJP9N9KAd1lck6NcFPKpBVLAtYyxG6Ng1uXRXclA2qw_E_iomHZwrlo
         "corporationId": "dc088f82-db57-4bb1-9290-ea4ea4bedd90",
         "addressId": "01da468f-d60e-413b-b3a4-c1780530dd78"
     }
+}
+
+###
+PATCH /api/v1/employees/office-transfer/async?employeeId=19d23b68-2c5f-4bbb-bf90-bfd15ea9871f
+Host: localhost:8765
+Accept: application/json
+Content-Type: application/json
+Authorization: Basic director@gmail.com director
+X-Csrf-Token: eJ_ZxV-42kTGimOUFrr3Gk9Ypr7t_OyC-uAFsv_YgMTxV49wSa3s_GmI6HXrvAaiIJfDLi0-i4bfytyvzIY8gJq-sPDANu4U
+
+{
+    "corporationId": "dc088f82-db57-4bb1-9290-ea4ea4bedd90",
+    "addressId": "acc8c398-483c-4977-877f-f0e5a086b2a4"
 }

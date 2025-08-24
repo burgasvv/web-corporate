@@ -3,7 +3,9 @@ package org.burgas.corporateservice.filter;
 import lombok.RequiredArgsConstructor;
 import org.burgas.corporateservice.dto.employee.EmployeeRequest;
 import org.burgas.corporateservice.entity.Corporation;
+import org.burgas.corporateservice.entity.Employee;
 import org.burgas.corporateservice.entity.Identity;
+import org.burgas.corporateservice.entity.OfficePK;
 import org.burgas.corporateservice.exception.*;
 import org.burgas.corporateservice.repository.CorporationRepository;
 import org.jetbrains.annotations.NotNull;
@@ -16,8 +18,8 @@ import org.springframework.web.servlet.function.ServerResponse;
 
 import java.util.UUID;
 
-import static org.burgas.corporateservice.message.CorporationMessages.CORPORATION_NOT_FOUND;
-import static org.burgas.corporateservice.message.CorporationMessages.IDENTITY_NOT_DIRECTOR;
+import static org.burgas.corporateservice.message.CorporationMessages.*;
+import static org.burgas.corporateservice.message.EmployeeMessages.EMPLOYEE_NOT_FOUND;
 import static org.burgas.corporateservice.message.EmployeeMessages.IDENTITY_NOT_EMPLOYEE;
 import static org.burgas.corporateservice.message.IdentityMessages.IDENTITY_NOT_AUTHENTICATED;
 import static org.burgas.corporateservice.message.IdentityMessages.IDENTITY_NOT_AUTHORIZED;
@@ -25,12 +27,14 @@ import static org.burgas.corporateservice.message.IdentityMessages.IDENTITY_NOT_
 @Component
 @RequiredArgsConstructor
 public class EmployeeFilterFunction implements HandlerFilterFunction<ServerResponse, ServerResponse> {
+
     private final CorporationRepository corporationRepository;
 
     @Override
     public @NotNull ServerResponse filter(@NotNull ServerRequest request, @NotNull HandlerFunction<ServerResponse> next) throws Exception {
         if (
-                request.path().equals("/api/v1/employees/create") || request.path().equals("/api/v1/employees/update")
+                request.path().equals("/api/v1/employees/create") || request.path().equals("/api/v1/employees/create/async") ||
+                request.path().equals("/api/v1/employees/update") || request.path().equals("/api/v1/employees/update/async")
         ) {
             Authentication authentication = request.principal()
                     .map(Authentication.class::cast)
@@ -61,7 +65,7 @@ public class EmployeeFilterFunction implements HandlerFilterFunction<ServerRespo
                 throw new IdentityNotAuthenticatedException(IDENTITY_NOT_AUTHENTICATED.getMessage());
             }
 
-        } else if (request.path().equals("/api/v1/employees/delete")) {
+        } else if (request.path().equals("/api/v1/employees/delete") || request.path().equals("/api/v1/employees/delete/async")) {
 
             Authentication authentication = request.principal()
                     .map(Authentication.class::cast)
@@ -78,6 +82,48 @@ public class EmployeeFilterFunction implements HandlerFilterFunction<ServerRespo
 
                 } else {
                     throw new IdentityNotEmployeeException(IDENTITY_NOT_EMPLOYEE.getMessage());
+                }
+
+            } else {
+                throw new IdentityNotAuthenticatedException(IDENTITY_NOT_AUTHENTICATED.getMessage());
+            }
+
+        } else if (request.path().equals("/api/v1/employees/office-transfer") || request.path().equals("/api/v1/employees/office-transfer/async")) {
+
+            Authentication authentication = request.principal()
+                    .map(Authentication.class::cast)
+                    .orElseThrow();
+
+            if (authentication.isAuthenticated()) {
+
+                Identity identity = (Identity) authentication.getPrincipal();
+                Employee employee = identity.getEmployee();
+
+                if (employee != null) {
+
+                    UUID employeeId = request.param("employeeId")
+                            .map(UUID::fromString)
+                            .orElseThrow(() -> new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND.getMessage()));
+                    OfficePK officePK = request.body(OfficePK.class);
+
+                    if (officePK.getCorporationId().equals(employee.getOffice().getOfficePK().getCorporationId())) {
+                        Corporation corporation = this.corporationRepository.findById(officePK.getCorporationId())
+                                .orElseThrow(() -> new CorporationNotFoundException(CORPORATION_NOT_FOUND.getMessage()));
+
+                        if (employee.getId().equals(employeeId) || corporation.getDirectors().contains(identity.getId())) {
+                            request.attributes().put("officePK", officePK);
+                            return next.handle(request);
+
+                        }  else {
+                            throw new WrongEmployeeOrCorporationException(WRONG_EMPLOYEE_OR_CORPORATION.getMessage());
+                        }
+
+                    } else {
+                        throw new WrongCorporationException(WRONG_CORPORATION.getMessage());
+                    }
+
+                } else {
+                    throw new EmployeeNotFoundException(EMPLOYEE_NOT_FOUND.getMessage());
                 }
 
             } else {

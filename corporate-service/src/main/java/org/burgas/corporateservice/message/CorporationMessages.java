@@ -5,6 +5,8 @@ import lombok.Getter;
 @Getter
 public enum CorporationMessages {
 
+    WRONG_EMPLOYEE_OR_CORPORATION("Wrong employee of corporation"),
+    WRONG_CORPORATION("Wrong corporation for transfer"),
     IDENTITY_NOT_DIRECTOR("Identity not director of this corporation"),
     CORPORATION_DIRECTOR_ADDED("Corporation director already added"),
     CORPORATION_WRONG_DIRECTOR("Wrong director id"),

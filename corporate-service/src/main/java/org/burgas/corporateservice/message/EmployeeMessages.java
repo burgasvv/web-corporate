@@ -5,6 +5,8 @@ import lombok.Getter;
 @Getter
 public enum EmployeeMessages {
 
+    EMPLOYEE_OFFICE_MATCHES("Employee office matches"),
+    EMPLOYEE_TRANSFER("Employee was transfer"),
     IDENTITY_NOT_EMPLOYEE("Identity not employee"),
     EMPLOYEE_DELETED("Employee deleted"),
     EMPLOYEE_NOT_FOUND("Employee not found"),

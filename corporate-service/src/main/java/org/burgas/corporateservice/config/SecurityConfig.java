@@ -72,7 +72,9 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/api/v1/identities/make-user", "/api/v1/identities/make-user/async",
 
-                                        "/api/v1/employees/by-corporation", "/api/v1/employees/by-office", "/api/v1/employees/by-id"
+                                        "/api/v1/employees/by-corporation", "/api/v1/employees/by-corporation/async",
+                                        "/api/v1/employees/by-office", "/api/v1/employees/by-office/async",
+                                        "/api/v1/employees/by-id", "/api/v1/employees/by-id/async"
                                 )
                                 .hasAnyAuthority(ADMIN.getAuthority(), WORKER.getAuthority(), DIRECTOR.getAuthority())
 
@@ -87,7 +89,10 @@ public class SecurityConfig {
                                 .hasAnyAuthority(USER.getAuthority(), DIRECTOR.getAuthority())
 
                                 .requestMatchers(
-                                        "/api/v1/employees/create", "/api/v1/employees/update", "/api/v1/employees/delete"
+                                        "/api/v1/employees/create", "/api/v1/employees/create/async",
+                                        "/api/v1/employees/update", "/api/v1/employees/update/async",
+                                        "/api/v1/employees/delete", "/api/v1/employees/delete/async",
+                                        "/api/v1/employees/office-transfer", "/api/v1/employees/office-transfer/async"
                                 )
                                 .hasAnyAuthority(WORKER.getAuthority(), DIRECTOR.getAuthority())
 
