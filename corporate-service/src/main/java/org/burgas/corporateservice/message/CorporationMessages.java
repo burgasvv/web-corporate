@@ -5,6 +5,9 @@ import lombok.Getter;
 @Getter
 public enum CorporationMessages {
 
+    CORPORATION_IMAGE_DELETED("Corporation image deleted"),
+    CORPORATION_IMAGE_CHANGED("Corporation image changed"),
+    CORPORATION_IMAGE_UPLOADED("Corporation image uploaded"),
     WRONG_EMPLOYEE_OR_CORPORATION("Wrong employee of corporation"),
     WRONG_CORPORATION("Wrong corporation for transfer"),
     IDENTITY_NOT_DIRECTOR("Identity not director of this corporation"),

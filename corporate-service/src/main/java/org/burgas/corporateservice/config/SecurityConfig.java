@@ -104,7 +104,11 @@ public class SecurityConfig {
 
                                         "/api/v1/offices/create", "/api/v1/offices/create/async",
                                         "/api/v1/offices/update", "/api/v1/offices/update/async",
-                                        "/api/v1/offices/delete", "/api/v1/offices/delete/async"
+                                        "/api/v1/offices/delete", "/api/v1/offices/delete/async",
+
+                                        "/api/v1/corporations/upload-image", "/api/v1/corporations/upload-image/async",
+                                        "/api/v1/corporations/change-image", "/api/v1/corporations/change-image/async",
+                                        "/api/v1/corporations/delete-image", "/api/v1/corporations/delete-image/async"
                                 )
                                 .hasAnyAuthority(DIRECTOR.getAuthority())
 

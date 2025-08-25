@@ -1,10 +1,13 @@
 package org.burgas.corporateservice.service;
 
+import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import org.burgas.corporateservice.dto.corporation.CorporationRequest;
 import org.burgas.corporateservice.dto.corporation.CorporationResponse;
 import org.burgas.corporateservice.entity.Corporation;
+import org.burgas.corporateservice.entity.Media;
 import org.burgas.corporateservice.exception.CorporationNotFoundException;
+import org.burgas.corporateservice.exception.MediaNotFoundException;
 import org.burgas.corporateservice.exception.WrongDirectorIdException;
 import org.burgas.corporateservice.mapper.CorporationMapper;
 import org.burgas.corporateservice.repository.CorporationRepository;
@@ -17,11 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static org.burgas.corporateservice.message.CorporationMessages.*;
+import static org.burgas.corporateservice.message.MediaMessages.MEDIA_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +35,7 @@ public class CorporationService implements CrudService<CorporationRequest, Corpo
 
     private final CorporationRepository corporationRepository;
     private final CorporationMapper corporationMapper;
+    private final MediaService mediaService;
 
     public Corporation findCorporation(final UUID corporationId) {
         return this.corporationRepository.findById(corporationId == null ? UUID.nameUUIDFromBytes("0".getBytes(StandardCharsets.UTF_8)) : corporationId)
@@ -131,5 +137,78 @@ public class CorporationService implements CrudService<CorporationRequest, Corpo
     )
     public CompletableFuture<String> addDirectorAsync(final UUID corporationId, final UUID alreadyDirectorId, final UUID newDirectorId) {
         return CompletableFuture.supplyAsync(() -> this.addDirector(corporationId, alreadyDirectorId, newDirectorId));
+    }
+
+    @Transactional(
+            isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
+            rollbackFor = Exception.class
+    )
+    public String uploadImage(final UUID corporationId, final Part file) {
+        Corporation corporation = this.findCorporation(corporationId);
+        Media image = this.mediaService.upload(file);
+        corporation.setImage(image);
+        this.corporationRepository.save(corporation);
+        return CORPORATION_IMAGE_UPLOADED.getMessage();
+    }
+
+    @Async(value = "asyncExecutor")
+    @Transactional(
+            isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
+            rollbackFor = Exception.class
+    )
+    public CompletableFuture<String> uploadImageAsync(final UUID corporationId, final Part file) {
+        return CompletableFuture.supplyAsync(() -> this.uploadImage(corporationId, file));
+    }
+
+    @Transactional(
+            isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
+            rollbackFor = Exception.class
+    )
+    public String changeImage(final UUID corporationId, final Part file) {
+        Corporation corporation = this.findCorporation(corporationId);
+        return Optional.of(corporation.getImage())
+                .map(
+                        image -> {
+                            this.mediaService.change(image.getId(), file);
+                            return CORPORATION_IMAGE_CHANGED.getMessage();
+                        }
+                )
+                .orElseThrow(() -> new MediaNotFoundException(MEDIA_NOT_FOUND.getMessage()));
+    }
+
+    @Async(value = "asyncExecutor")
+    @Transactional(
+            isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
+            rollbackFor = Exception.class
+    )
+    public CompletableFuture<String> changeImageAsync(final UUID corporationId, final Part file) {
+        return CompletableFuture.supplyAsync(() -> this.changeImage(corporationId, file));
+    }
+
+    @Transactional(
+            isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
+            rollbackFor = Exception.class
+    )
+    public String deleteImage(final UUID corporationId) {
+        Corporation corporation = this.findCorporation(corporationId);
+        return Optional.of(corporation.getImage())
+                .map(
+                        image -> {
+                            corporation.setImage(null);
+                            this.corporationRepository.save(corporation);
+                            this.mediaService.delete(image.getId());
+                            return CORPORATION_IMAGE_DELETED.getMessage();
+                        }
+                )
+                .orElseThrow(() -> new MediaNotFoundException(MEDIA_NOT_FOUND.getMessage()));
+    }
+
+    @Async(value = "asyncExecutor")
+    @Transactional(
+            isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
+            rollbackFor = Exception.class
+    )
+    public CompletableFuture<String> deleteImageAsync(final UUID corporationId) {
+        return CompletableFuture.supplyAsync(() -> this.deleteImage(corporationId));
     }
 }

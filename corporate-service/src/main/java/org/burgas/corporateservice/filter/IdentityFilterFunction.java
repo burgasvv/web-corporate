@@ -138,7 +138,12 @@ public class IdentityFilterFunction implements HandlerFilterFunction<ServerRespo
                 throw new IdentityNotAuthenticatedException(IdentityMessages.IDENTITY_NOT_AUTHENTICATED.getMessage());
             }
 
-        } else if (request.path().equals("/api/v1/corporations/delete") || request.path().equals("/api/v1/corporations/delete/async")) {
+        } else if (
+                request.path().equals("/api/v1/corporations/delete") || request.path().equals("/api/v1/corporations/delete/async") ||
+                request.path().equals("/api/v1/corporations/upload-image") || request.path().equals("/api/v1/corporations/upload-image/async") ||
+                request.path().equals("/api/v1/corporations/change-image") || request.path().equals("/api/v1/corporations/change-image/async") ||
+                request.path().equals("/api/v1/corporations/delete-image") || request.path().equals("/api/v1/corporations/delete-image/async")
+        ) {
 
             Authentication authentication = request.principal()
                     .map(Authentication.class::cast)

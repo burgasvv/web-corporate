@@ -3,6 +3,7 @@ package org.burgas.corporateservice.router;
 import org.burgas.corporateservice.dto.corporation.CorporationRequest;
 import org.burgas.corporateservice.exception.CorporationNotFoundException;
 import org.burgas.corporateservice.exception.EmptyDirectorIdException;
+import org.burgas.corporateservice.exception.MediaNotFoundException;
 import org.burgas.corporateservice.exception.WrongDirectorIdException;
 import org.burgas.corporateservice.filter.IdentityFilterFunction;
 import org.burgas.corporateservice.repository.CorporationRepository;
@@ -154,6 +155,76 @@ public class CorporationRouter {
                                                 )
                                         )
                 )
+                .POST(
+                        "/api/v1/corporations/upload-image", request ->
+                                ServerResponse
+                                        .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(
+                                                corporationService.uploadImage(
+                                                        UUID.fromString(request.param("corporationId").orElseThrow()),
+                                                        request.multipartData().getFirst("file")
+                                                )
+                                        )
+                )
+                .POST(
+                        "/api/v1/corporations/upload-image/async", request ->
+                                ServerResponse
+                                        .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(
+                                                corporationService.uploadImageAsync(
+                                                        UUID.fromString(request.param("corporationId").orElseThrow()),
+                                                        request.multipartData().getFirst("file")
+                                                )
+                                        )
+                )
+                .PUT(
+                        "/api/v1/corporations/change-image", request ->
+                                ServerResponse
+                                        .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(
+                                                corporationService.changeImage(
+                                                        UUID.fromString(request.param("corporationId").orElseThrow()),
+                                                        request.multipartData().getFirst("file")
+                                                )
+                                        )
+                )
+                .PUT(
+                        "/api/v1/corporations/change-image/async", request ->
+                                ServerResponse
+                                        .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(
+                                                corporationService.changeImageAsync(
+                                                        UUID.fromString(request.param("corporationId").orElseThrow()),
+                                                        request.multipartData().getFirst("file")
+                                                )
+                                        )
+                )
+                .DELETE(
+                        "/api/v1/corporations/delete-image", request ->
+                                ServerResponse
+                                        .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(
+                                                corporationService.deleteImage(
+                                                        UUID.fromString(request.param("corporationId").orElseThrow())
+                                                )
+                                        )
+                )
+                .DELETE(
+                        "/api/v1/corporations/delete-image/async", request ->
+                                ServerResponse
+                                        .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(
+                                                corporationService.deleteImageAsync(
+                                                        UUID.fromString(request.param("corporationId").orElseThrow())
+                                                )
+                                        )
+                )
                 .onError(
                         DataIntegrityViolationException.class, (throwable, serverRequest) ->
                                 ServerResponse
@@ -179,6 +250,13 @@ public class CorporationRouter {
                         EmptyDirectorIdException.class, (throwable, serverRequest) ->
                                 ServerResponse
                                         .status(HttpStatus.OK)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(throwable.getMessage())
+                )
+                .onError(
+                        MediaNotFoundException.class, (throwable, serverRequest) ->
+                                ServerResponse
+                                        .status(HttpStatus.NOT_ACCEPTABLE)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(throwable.getMessage())
                 )
