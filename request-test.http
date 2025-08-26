@@ -149,7 +149,7 @@ Host: localhost:8765
 Accept: application/json
 
 ### Sync
-GET /api/v1/corporations/by-id?corporationId=3eb603e8-8f74-43cb-ac8b-a4edd29f30cf
+GET /api/v1/corporations/by-id?corporationId=dc088f82-db57-4bb1-9290-ea4ea4bedd90
 Host: localhost:8765
 Accept: application/json
 
