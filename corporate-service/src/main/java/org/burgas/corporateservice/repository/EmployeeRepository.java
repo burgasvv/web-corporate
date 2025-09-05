@@ -5,6 +5,7 @@ import org.burgas.corporateservice.entity.Office;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -32,4 +33,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     @Override
     @EntityGraph(value = "employee-entity-graph", type = EntityGraph.EntityGraphType.FETCH)
     @NotNull Optional<Employee> findById(@NotNull UUID uuid);
+
+    @Modifying
+    @Query(
+            nativeQuery = true,
+            value = "delete from employee e where e.id = :employeeId"
+    )
+    void deleteEmployeeById(UUID employeeId);
 }

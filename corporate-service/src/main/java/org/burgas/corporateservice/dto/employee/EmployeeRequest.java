@@ -16,6 +16,7 @@ public final class EmployeeRequest extends Request {
 
     private UUID id;
     private UUID identityId;
+    private UUID positionId;
     private String firstName;
     private String lastName;
     private String patronymic;

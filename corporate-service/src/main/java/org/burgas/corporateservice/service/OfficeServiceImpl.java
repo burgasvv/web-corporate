@@ -10,7 +10,6 @@ import org.burgas.corporateservice.mapper.OfficeMapper;
 import org.burgas.corporateservice.message.OfficeMessages;
 import org.burgas.corporateservice.repository.OfficeRepository;
 import org.burgas.corporateservice.service.contract.OfficeService;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static org.burgas.corporateservice.message.OfficeMessages.OFFICE_NOT_FOUND;
@@ -47,21 +45,9 @@ public class OfficeServiceImpl implements OfficeService<OfficeRequest, OfficeWit
                 .collect(Collectors.toList());
     }
 
-    @Async(value = "asyncExecutor")
-    public CompletableFuture<List<OfficeWithEmployeesResponse>> findByCorporationIdAsync(final UUID corporationId) {
-        return CompletableFuture.supplyAsync(() -> this.findByCorporationId(corporationId));
-    }
-
     @Override
     public OfficeWithEmployeesResponse findById(OfficePK officePK) {
         return this.officeMapper.toResponse(this.findOffice(officePK));
-    }
-
-    @Async(value = "asyncExecutor")
-    public CompletableFuture<OfficeWithEmployeesResponse> findByIdAsync(final OfficePK officePK) {
-        return CompletableFuture.supplyAsync(
-                () -> this.officeMapper.toResponse(this.findOffice(officePK))
-        );
     }
 
     @Override
@@ -75,17 +61,6 @@ public class OfficeServiceImpl implements OfficeService<OfficeRequest, OfficeWit
         );
     }
 
-    @Async(value = "asyncExecutor")
-    @Transactional(
-            isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED,
-            rollbackFor = Exception.class
-    )
-    public CompletableFuture<OfficeWithEmployeesResponse> createOrUpdateAsync(final OfficeRequest officeRequest) {
-        return CompletableFuture.supplyAsync(() -> this.officeMapper.toEntity(officeRequest))
-                .thenApplyAsync(this.officeRepository::save)
-                .thenApplyAsync(this.officeMapper::toResponse);
-    }
-
     @Override
     @Transactional(
             isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED,
@@ -93,16 +68,9 @@ public class OfficeServiceImpl implements OfficeService<OfficeRequest, OfficeWit
     )
     public String delete(OfficePK officePK) {
         Office office = this.findOffice(officePK);
-        this.officeRepository.delete(office);
+        this.officeRepository.deleteOfficeByOfficePK(
+                office.getOfficePK().getCorporationId(), office.getOfficePK().getAddressId()
+        );
         return OfficeMessages.OFFICE_DELETED.getMessage();
-    }
-
-    @Async(value = "asyncExecutor")
-    @Transactional(
-            isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED,
-            rollbackFor = Exception.class
-    )
-    public CompletableFuture<String> deleteAsync(final OfficePK officePK) {
-        return CompletableFuture.supplyAsync(() -> this.delete(officePK));
     }
 }

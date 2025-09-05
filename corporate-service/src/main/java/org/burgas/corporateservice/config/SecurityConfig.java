@@ -33,11 +33,29 @@ public class SecurityConfig {
     }
 
     @Bean
+    public XorCsrfTokenRequestAttributeHandler xorCsrfTokenRequestAttributeHandler() {
+        return new XorCsrfTokenRequestAttributeHandler();
+    }
+
+    @Bean
+    public UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource() {
+        return new UrlBasedCorsConfigurationSource();
+    }
+
+    @Bean
+    public RequestAttributeSecurityContextRepository requestAttributeSecurityContextRepository() {
+        return new RequestAttributeSecurityContextRepository();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .csrf(csrf -> csrf.csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler()))
-                .cors(cors -> cors.configurationSource(new UrlBasedCorsConfigurationSource()))
-                .httpBasic(httpBasic -> httpBasic.securityContextRepository(new RequestAttributeSecurityContextRepository()))
+                .csrf(csrf -> csrf.csrfTokenRequestHandler(this.xorCsrfTokenRequestAttributeHandler()))
+                .cors(cors -> cors.configurationSource(this.urlBasedCorsConfigurationSource()))
+                .httpBasic(
+                        httpBasic -> httpBasic.
+                                securityContextRepository(this.requestAttributeSecurityContextRepository())
+                )
                 .authenticationManager(this.authenticationManager())
                 .authorizeHttpRequests(
                         httpRequests -> httpRequests
@@ -45,24 +63,24 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/api/v1/security/csrf-token",
 
-                                        "/api/v1/identities/create", "/api/v1/identities/create/async",
+                                        "/api/v1/identities/create",
 
-                                        "/api/v1/corporations", "/api/v1/corporations/by-id",
-                                        "/api/v1/corporations/async", "/api/v1/corporations/by-id/async",
+                                        "/api/v1/corporations",
+                                        "/api/v1/corporations/by-id",
 
-                                        "/api/v1/offices/by-corporation", "/api/v1/offices/by-corporation/async",
-                                        "/api/v1/offices/by-id", "/api/v1/offices/by-id/async"
+                                        "/api/v1/offices/by-corporation",
+                                        "/api/v1/offices/by-id"
                                 )
                                 .permitAll()
 
                                 .requestMatchers(
-                                        "/api/v1/identities/by-id", "/api/v1/identities/by-id/async",
-                                        "/api/v1/identities/update", "/api/v1/identities/update/async",
-                                        "/api/v1/identities/delete", "/api/v1/identities/delete/async",
-                                        "/api/v1/identities/change-password", "/api/v1/identities/change-password/async",
-                                        "/api/v1/identities/upload-image", "/api/v1/identities/upload-image/async",
-                                        "/api/v1/identities/change-image", "/api/v1/identities/change-image/async",
-                                        "/api/v1/identities/delete-image", "/api/v1/identities/delete-image/async"
+                                        "/api/v1/identities/by-id",
+                                        "/api/v1/identities/update",
+                                        "/api/v1/identities/delete",
+                                        "/api/v1/identities/change-password",
+                                        "/api/v1/identities/upload-image",
+                                        "/api/v1/identities/change-image",
+                                        "/api/v1/identities/delete-image"
                                 )
                                 .hasAnyAuthority(
                                         ADMIN.getAuthority(), USER.getAuthority(),
@@ -70,51 +88,64 @@ public class SecurityConfig {
                                 )
 
                                 .requestMatchers(
-                                        "/api/v1/identities/make-user", "/api/v1/identities/make-user/async",
-
-                                        "/api/v1/employees/by-corporation", "/api/v1/employees/by-corporation/async",
-                                        "/api/v1/employees/by-office", "/api/v1/employees/by-office/async",
-                                        "/api/v1/employees/by-id", "/api/v1/employees/by-id/async"
+                                        "/api/v1/identities/make-user"
                                 )
                                 .hasAnyAuthority(ADMIN.getAuthority(), WORKER.getAuthority(), DIRECTOR.getAuthority())
 
                                 .requestMatchers(
-                                        "/api/v1/identities/make-director", "/api/v1/identities/make-director/async"
+                                        "/api/v1/identities/make-director"
                                 )
                                 .hasAnyAuthority(USER.getAuthority(), WORKER.getAuthority())
 
                                 .requestMatchers(
-                                        "/api/v1/identities/make-employee", "/api/v1/identities/make-employee/async"
+                                        "/api/v1/identities/make-employee"
                                 )
                                 .hasAnyAuthority(USER.getAuthority(), DIRECTOR.getAuthority())
 
                                 .requestMatchers(
-                                        "/api/v1/employees/create", "/api/v1/employees/create/async",
-                                        "/api/v1/employees/update", "/api/v1/employees/update/async",
-                                        "/api/v1/employees/delete", "/api/v1/employees/delete/async",
-                                        "/api/v1/employees/office-transfer", "/api/v1/employees/office-transfer/async"
+                                        "/api/v1/employees/by-corporation",
+                                        "/api/v1/employees/by-office",
+                                        "/api/v1/employees/by-id",
+                                        "/api/v1/employees/create",
+                                        "/api/v1/employees/update",
+                                        "/api/v1/employees/delete",
+                                        "/api/v1/employees/office-transfer",
+
+                                        "/api/v1/departments/by-corporation",
+                                        "/api/v1/departments/by-id",
+
+                                        "/api/v1/positions/by-corporation",
+                                        "/api/v1/positions/by-department",
+                                        "/api/v1/positions/by-id"
                                 )
                                 .hasAnyAuthority(WORKER.getAuthority(), DIRECTOR.getAuthority())
 
                                 .requestMatchers(
-                                        "/api/v1/corporations/create", "/api/v1/corporations/update",
-                                        "/api/v1/corporations/delete", "/api/v1/corporations/add-director",
-                                        "/api/v1/corporations/create/async", "/api/v1/corporations/update/async",
-                                        "/api/v1/corporations/delete/async", "/api/v1/corporations/add-director/async",
+                                        "/api/v1/corporations/create",
+                                        "/api/v1/corporations/update",
+                                        "/api/v1/corporations/delete",
+                                        "/api/v1/corporations/add-director",
+                                        "/api/v1/corporations/upload-image",
+                                        "/api/v1/corporations/change-image",
+                                        "/api/v1/corporations/delete-image",
 
-                                        "/api/v1/offices/create", "/api/v1/offices/create/async",
-                                        "/api/v1/offices/update", "/api/v1/offices/update/async",
-                                        "/api/v1/offices/delete", "/api/v1/offices/delete/async",
+                                        "/api/v1/offices/create",
+                                        "/api/v1/offices/update",
+                                        "/api/v1/offices/delete",
 
-                                        "/api/v1/corporations/upload-image", "/api/v1/corporations/upload-image/async",
-                                        "/api/v1/corporations/change-image", "/api/v1/corporations/change-image/async",
-                                        "/api/v1/corporations/delete-image", "/api/v1/corporations/delete-image/async"
+                                        "/api/v1/departments/create",
+                                        "/api/v1/departments/update",
+                                        "/api/v1/departments/delete",
+
+                                        "/api/v1/positions/create",
+                                        "/api/v1/positions/update",
+                                        "/api/v1/positions/delete"
                                 )
                                 .hasAnyAuthority(DIRECTOR.getAuthority())
 
                                 .requestMatchers(
-                                        "/api/v1/identities", "/api/v1/identities/async",
-                                        "/api/v1/identities/enable-disable", "/api/v1/identities/enable-disable/async"
+                                        "/api/v1/identities",
+                                        "/api/v1/identities/enable-disable"
                                 )
                                 .hasAnyAuthority(ADMIN.getAuthority())
                 )

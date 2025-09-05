@@ -6,12 +6,12 @@ import lombok.*;
 
 import java.util.UUID;
 
-@Data
 @Entity
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @Table(name = "media", schema = "public")
 public final class Media extends File {
 

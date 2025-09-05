@@ -6,7 +6,9 @@
     <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-20--0003-create-corporation.sql" value="bffb0d90-1aa1-4c06-b21e-2f12376fd4c5" />
     <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-20--0004-create-address.sql" value="bffb0d90-1aa1-4c06-b21e-2f12376fd4c5" />
     <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-20--0005-create-office.sql" value="bffb0d90-1aa1-4c06-b21e-2f12376fd4c5" />
-    <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-20--0006-create-employee.sql" value="bffb0d90-1aa1-4c06-b21e-2f12376fd4c5" />
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-28--0006-create-department.sql" value="bffb0d90-1aa1-4c06-b21e-2f12376fd4c5" />
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-28--0007-create-position.sql" value="bffb0d90-1aa1-4c06-b21e-2f12376fd4c5" />
+    <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/create/2025-08-28--0008-create-employee.sql" value="bffb0d90-1aa1-4c06-b21e-2f12376fd4c5" />
     <file url="file://$PROJECT_DIR$/corporate-service/src/main/resources/db/changelog/populate/2025-08-18--0002-insert-identity.sql" value="bffb0d90-1aa1-4c06-b21e-2f12376fd4c5" />
   </component>
 </project>

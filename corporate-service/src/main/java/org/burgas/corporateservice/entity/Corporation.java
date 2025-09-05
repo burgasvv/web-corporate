@@ -8,18 +8,23 @@ import org.hibernate.type.SqlTypes;
 import java.util.List;
 import java.util.UUID;
 
-@Data
+
 @Entity
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @Table(name = "corporation", schema = "public")
 @NamedEntityGraph(
         name = "corporation-entity-graph",
         attributeNodes = {
-                @NamedAttributeNode(value = "image")
-        }
+                @NamedAttributeNode(value = "image"),
+                @NamedAttributeNode(value = "departments", subgraph = "department-subgraph")
+        },
+        subgraphs = @NamedSubgraph(
+                name = "department-subgraph", attributeNodes = @NamedAttributeNode(value = "offices")
+        )
 )
 public final class Corporation extends AbstractEntity {
 
@@ -47,4 +52,10 @@ public final class Corporation extends AbstractEntity {
     @OneToOne(targetEntity = Media.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "image_id", referencedColumnName = "id", unique = true)
     private Media image;
+
+    @OneToMany(
+            mappedBy = "corporation", targetEntity = Department.class,
+            cascade = CascadeType.ALL, fetch = FetchType.EAGER
+    )
+    private List<Department> departments;
 }

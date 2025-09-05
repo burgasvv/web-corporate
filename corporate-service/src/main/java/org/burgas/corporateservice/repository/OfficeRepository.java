@@ -5,6 +5,7 @@ import org.burgas.corporateservice.entity.OfficePK;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -24,4 +25,12 @@ public interface OfficeRepository extends JpaRepository<Office, OfficePK> {
             value = "select o.* from office o where o.corporation_id = :corporationId"
     )
     List<Office> findOfficesByCorporationId(final UUID corporationId);
+
+
+    @Modifying
+    @Query(
+            nativeQuery = true,
+            value = "delete from office o where o.corporation_id = :corporationId and o.address_id = :addressId"
+    )
+    void deleteOfficeByOfficePK(final UUID corporationId, final UUID addressId);
 }

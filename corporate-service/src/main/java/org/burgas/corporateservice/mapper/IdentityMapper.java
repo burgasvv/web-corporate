@@ -29,16 +29,17 @@ public final class IdentityMapper implements EntityMapper<IdentityRequest, Ident
         UUID identityId = this.handleData(identityRequest.getId(), UUID.nameUUIDFromBytes("0".getBytes(StandardCharsets.UTF_8)));
         return this.identityRepository.findById(identityId)
                 .map(
-                        identity -> Identity.builder()
-                                .id(identity.getId())
-                                .authority(identity.getAuthority())
-                                .username(this.handleData(identityRequest.getUsername(), identity.getUsernameNotUserDetails()))
-                                .password(identity.getPassword())
-                                .email(this.handleData(identityRequest.getEmail(), identity.getEmail()))
-                                .phone(this.handleData(identityRequest.getPhone(), identity.getPhone()))
-                                .enabled(identity.getEnabled())
-                                .employee(identity.getEmployee())
-                                .build()
+                        identity ->
+                            Identity.builder()
+                                    .id(identity.getId())
+                                    .authority(identity.getAuthority())
+                                    .username(this.handleData(identityRequest.getUsername(), identity.getUsernameNotUserDetails()))
+                                    .password(identity.getPassword())
+                                    .email(this.handleData(identityRequest.getEmail(), identity.getEmail()))
+                                    .phone(this.handleData(identityRequest.getPhone(), identity.getPhone()))
+                                    .enabled(identity.getEnabled())
+                                    .employee(identity.getEmployee())
+                                    .build()
                 )
                 .orElseGet(
                         () -> {

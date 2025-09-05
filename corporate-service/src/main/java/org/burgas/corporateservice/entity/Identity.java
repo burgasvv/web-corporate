@@ -9,12 +9,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Data
 @Entity
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @Table(name = "identity", schema = "public")
 @NamedEntityGraph(
         name = "identity-entity-graph",

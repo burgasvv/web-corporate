@@ -1,6 +1,7 @@
 package org.burgas.corporateservice.mapper;
 
 import lombok.RequiredArgsConstructor;
+import org.burgas.corporateservice.dto.department.DepartmentWithoutOfficesResponse;
 import org.burgas.corporateservice.dto.employee.EmployeeWithoutOfficeResponse;
 import org.burgas.corporateservice.dto.identity.IdentityWithoutEmployeeResponse;
 import org.burgas.corporateservice.dto.office.OfficeRequest;
@@ -64,8 +65,8 @@ public final class OfficeMapper implements EntityMapper<OfficeRequest, Office, O
                                                     .addressId(newAddress.getId()).corporationId(office.getOfficePK().getCorporationId())
                                                     .build()
                                     )
-                                    .employees(office.getEmployees())
                                     .employeesAmount((long) office.getEmployees().size())
+                                    .employees(employeesByIds)
                                     .build();
                         }
                 )
@@ -111,6 +112,7 @@ public final class OfficeMapper implements EntityMapper<OfficeRequest, Office, O
                                     .officePK(build)
                                     .employees(employeesByIds)
                                     .employeesAmount((long) employeesByIds.size())
+                                    .employees(employeesByIds)
                                     .build();
                         }
                 );
@@ -152,6 +154,18 @@ public final class OfficeMapper implements EntityMapper<OfficeRequest, Office, O
                                                 .patronymic(employee.getPatronymic())
                                                 .about(employee.getAbout())
                                                 .address(employee.getAddress())
+                                                .build()
+                                )
+                                .toList()
+                )
+                .departments(
+                        office.getDepartments() == null ? null : office.getDepartments()
+                                .stream()
+                                .map(
+                                        department -> DepartmentWithoutOfficesResponse.builder()
+                                                .id(department.getId())
+                                                .name(department.getName())
+                                                .description(department.getDescription())
                                                 .build()
                                 )
                                 .toList()

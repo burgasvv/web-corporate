@@ -5,19 +5,27 @@ import lombok.*;
 
 import java.util.UUID;
 
-@Data
+
 @Entity
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @Table(name = "employee", schema = "public")
 @NamedEntityGraph(
         name = "employee-entity-graph",
         attributeNodes = {
                 @NamedAttributeNode(value = "address"),
                 @NamedAttributeNode(value = "office"),
-                @NamedAttributeNode(value = "identity")
+                @NamedAttributeNode(value = "identity"),
+                @NamedAttributeNode(value = "position", subgraph = "position-subgraph")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "position-subgraph",
+                        attributeNodes = @NamedAttributeNode(value = "department")
+                )
         }
 )
 public final class Employee extends AbstractEntity {
@@ -27,7 +35,7 @@ public final class Employee extends AbstractEntity {
     @Column(name = "id", unique = true, nullable = false)
     private UUID id;
 
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+    @OneToOne
     @JoinColumn(name = "identity_id", referencedColumnName = "id", unique = true)
     private Identity identity;
 
@@ -43,15 +51,11 @@ public final class Employee extends AbstractEntity {
     @Column(name = "about", nullable = false, unique = true)
     private String about;
 
-    @OneToOne(targetEntity = Address.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id", referencedColumnName = "id", unique = true)
     private Address address;
 
-    @ManyToOne(
-            targetEntity = Office.class,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH},
-            fetch = FetchType.EAGER
-    )
+    @ManyToOne
     @JoinColumns(
             value = {
                     @JoinColumn(name = "office_corporation_id", referencedColumnName = "corporation_id"),
@@ -59,4 +63,8 @@ public final class Employee extends AbstractEntity {
             }
     )
     private Office office;
+
+    @OneToOne
+    @JoinColumn(name = "position_id", referencedColumnName = "id")
+    private Position position;
 }

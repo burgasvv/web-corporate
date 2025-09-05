@@ -5,12 +5,12 @@ import lombok.*;
 
 import java.util.UUID;
 
-@Data
 @Entity
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @Table(name = "address", schema = "public")
 public final class Address extends AbstractEntity {
 

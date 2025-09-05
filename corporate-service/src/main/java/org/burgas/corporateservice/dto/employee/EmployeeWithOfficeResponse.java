@@ -4,6 +4,7 @@ import lombok.*;
 import org.burgas.corporateservice.dto.Response;
 import org.burgas.corporateservice.dto.identity.IdentityWithoutEmployeeResponse;
 import org.burgas.corporateservice.dto.office.OfficeWithoutEmployeesResponse;
+import org.burgas.corporateservice.dto.position.PositionWithoutEmployeeResponse;
 import org.burgas.corporateservice.entity.Address;
 
 import java.util.UUID;
@@ -22,5 +23,6 @@ public final class EmployeeWithOfficeResponse extends Response {
     private String patronymic;
     private String about;
     private Address address;
+    private PositionWithoutEmployeeResponse position;
     private OfficeWithoutEmployeesResponse office;
 }

@@ -1,12 +1,12 @@
 package org.burgas.corporateservice.router;
 
+import lombok.RequiredArgsConstructor;
 import org.burgas.corporateservice.dto.corporation.CorporationRequest;
 import org.burgas.corporateservice.exception.CorporationNotFoundException;
 import org.burgas.corporateservice.exception.EmptyDirectorIdException;
 import org.burgas.corporateservice.exception.MediaNotFoundException;
 import org.burgas.corporateservice.exception.WrongDirectorIdException;
-import org.burgas.corporateservice.filter.IdentityFilterFunction;
-import org.burgas.corporateservice.repository.CorporationRepository;
+import org.burgas.corporateservice.filter.CorporationFilterFunction;
 import org.burgas.corporateservice.service.CorporationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,25 +21,22 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Configuration
+@RequiredArgsConstructor
 public class CorporationRouter {
 
+    private final CorporationService corporationService;
+    private final CorporationFilterFunction corporationFilterFunction;
+
     @Bean
-    public RouterFunction<ServerResponse> corporationRoutes(final CorporationService corporationService, final CorporationRepository corporationRepository) {
+    public RouterFunction<ServerResponse> corporationRoutes() {
         return RouterFunctions.route()
-                .filter(new IdentityFilterFunction(corporationRepository))
+                .filter(this.corporationFilterFunction)
                 .GET(
                         "/api/v1/corporations", request ->
                                 ServerResponse
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .body(corporationService.findAll())
-                )
-                .GET(
-                        "/api/v1/corporations/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(corporationService.findAllAsync().get())
+                                        .body(this.corporationService.findAll())
                 )
                 .GET(
                         "/api/v1/corporations/by-id", request ->
@@ -47,18 +44,7 @@ public class CorporationRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(
-                                                corporationService.findById(
-                                                        UUID.fromString(request.param("corporationId").orElseThrow())
-                                                )
-                                        )
-                )
-                .GET(
-                        "/api/v1/corporations/by-id/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                corporationService.findByIdAsync(
+                                                this.corporationService.findById(
                                                         UUID.fromString(request.param("corporationId").orElseThrow())
                                                 )
                                         )
@@ -69,18 +55,7 @@ public class CorporationRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(
-                                                corporationService.createOrUpdate(
-                                                        request.body(CorporationRequest.class)
-                                                )
-                                        )
-                )
-                .POST(
-                        "/api/v1/corporations/create/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                corporationService.createOrUpdateAsync(
+                                                this.corporationService.createOrUpdate(
                                                         request.body(CorporationRequest.class)
                                                 )
                                         )
@@ -91,18 +66,7 @@ public class CorporationRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(
-                                                corporationService.createOrUpdate(
-                                                        (CorporationRequest) request.attribute("corporationRequest").orElseThrow()
-                                                )
-                                        )
-                )
-                .PUT(
-                        "/api/v1/corporations/update/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                corporationService.createOrUpdateAsync(
+                                                this.corporationService.createOrUpdate(
                                                         (CorporationRequest) request.attribute("corporationRequest").orElseThrow()
                                                 )
                                         )
@@ -113,18 +77,7 @@ public class CorporationRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
                                         .body(
-                                                corporationService.delete(
-                                                        UUID.fromString(request.param("corporationId").orElseThrow())
-                                                )
-                                        )
-                )
-                .DELETE(
-                        "/api/v1/corporations/delete/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
-                                        .body(
-                                                corporationService.deleteAsync(
+                                                this.corporationService.delete(
                                                         UUID.fromString(request.param("corporationId").orElseThrow())
                                                 )
                                         )
@@ -135,20 +88,7 @@ public class CorporationRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
                                         .body(
-                                                corporationService.addDirector(
-                                                        UUID.fromString(request.param("corporationId").orElseThrow()),
-                                                        UUID.fromString(request.param("alreadyDirectorId").orElseThrow()),
-                                                        UUID.fromString(request.param("newDirectorId").orElseThrow())
-                                                )
-                                        )
-                )
-                .PUT(
-                        "/api/v1/corporations/add-director/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                corporationService.addDirectorAsync(
+                                                this.corporationService.addDirector(
                                                         UUID.fromString(request.param("corporationId").orElseThrow()),
                                                         UUID.fromString(request.param("alreadyDirectorId").orElseThrow()),
                                                         UUID.fromString(request.param("newDirectorId").orElseThrow())
@@ -161,19 +101,7 @@ public class CorporationRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(
-                                                corporationService.uploadImage(
-                                                        UUID.fromString(request.param("corporationId").orElseThrow()),
-                                                        request.multipartData().getFirst("file")
-                                                )
-                                        )
-                )
-                .POST(
-                        "/api/v1/corporations/upload-image/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                corporationService.uploadImageAsync(
+                                                this.corporationService.uploadImage(
                                                         UUID.fromString(request.param("corporationId").orElseThrow()),
                                                         request.multipartData().getFirst("file")
                                                 )
@@ -185,19 +113,7 @@ public class CorporationRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(
-                                                corporationService.changeImage(
-                                                        UUID.fromString(request.param("corporationId").orElseThrow()),
-                                                        request.multipartData().getFirst("file")
-                                                )
-                                        )
-                )
-                .PUT(
-                        "/api/v1/corporations/change-image/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                corporationService.changeImageAsync(
+                                                this.corporationService.changeImage(
                                                         UUID.fromString(request.param("corporationId").orElseThrow()),
                                                         request.multipartData().getFirst("file")
                                                 )
@@ -209,18 +125,7 @@ public class CorporationRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(
-                                                corporationService.deleteImage(
-                                                        UUID.fromString(request.param("corporationId").orElseThrow())
-                                                )
-                                        )
-                )
-                .DELETE(
-                        "/api/v1/corporations/delete-image/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                corporationService.deleteImageAsync(
+                                                this.corporationService.deleteImage(
                                                         UUID.fromString(request.param("corporationId").orElseThrow())
                                                 )
                                         )

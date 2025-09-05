@@ -7,10 +7,10 @@ import lombok.*;
 import java.io.Serializable;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Builder
 @Embeddable
-@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public final class OfficePK implements Serializable {

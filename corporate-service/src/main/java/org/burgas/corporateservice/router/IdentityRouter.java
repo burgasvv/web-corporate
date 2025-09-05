@@ -1,9 +1,9 @@
 package org.burgas.corporateservice.router;
 
+import lombok.RequiredArgsConstructor;
 import org.burgas.corporateservice.dto.identity.IdentityRequest;
 import org.burgas.corporateservice.exception.*;
 import org.burgas.corporateservice.filter.IdentityFilterFunction;
-import org.burgas.corporateservice.repository.CorporationRepository;
 import org.burgas.corporateservice.service.IdentityService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,25 +19,22 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Configuration
+@RequiredArgsConstructor
 public class IdentityRouter {
 
+    private final IdentityService identityService;
+    private final IdentityFilterFunction identityFilterFunction;
+
     @Bean
-    public RouterFunction<ServerResponse> identityRoutes(final IdentityService identityService, final CorporationRepository corporationRepository) {
+    public RouterFunction<ServerResponse> identityRoutes() {
         return RouterFunctions.route()
-                .filter(new IdentityFilterFunction(corporationRepository))
+                .filter(this.identityFilterFunction)
                 .GET(
                         "/api/v1/identities", request ->
                                 ServerResponse
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .body(identityService.findAll())
-                )
-                .GET(
-                        "/api/v1/identities/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(identityService.findAllAsync().get())
+                                        .body(this.identityService.findAll())
                 )
                 .GET(
                         "/api/v1/identities/by-id", request ->
@@ -45,20 +42,9 @@ public class IdentityRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(
-                                                identityService.findById(
+                                                this.identityService.findById(
                                                         UUID.fromString(request.param("identityId").orElseThrow())
                                                 )
-                                        )
-                )
-                .GET(
-                        "/api/v1/identities/by-id/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                identityService
-                                                        .findByIdAsync(UUID.fromString(request.param("identityId").orElseThrow()))
-                                                        .get()
                                         )
                 )
                 .POST(
@@ -66,14 +52,7 @@ public class IdentityRouter {
                                 ServerResponse
                                         .status(HttpStatus.CREATED)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .body(identityService.createOrUpdate(request.body(IdentityRequest.class)))
-                )
-                .POST(
-                        "/api/v1/identities/create/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(identityService.createOrUpdateAsync(request.body(IdentityRequest.class)).get())
+                                        .body(this.identityService.createOrUpdate(request.body(IdentityRequest.class)))
                 )
                 .PUT(
                         "/api/v1/identities/update", request ->
@@ -81,20 +60,9 @@ public class IdentityRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(
-                                                identityService.createOrUpdate(
+                                                this.identityService.createOrUpdate(
                                                         (IdentityRequest) request.attribute("identityRequest").orElseThrow()
                                                 )
-                                        )
-                )
-                .PUT(
-                        "/api/v1/identities/update/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                identityService.createOrUpdateAsync(
-                                                        (IdentityRequest) request.attribute("identityRequest").orElseThrow()
-                                                ).get()
                                         )
                 )
                 .DELETE(
@@ -103,20 +71,9 @@ public class IdentityRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
                                         .body(
-                                                identityService.delete(
+                                                this.identityService.delete(
                                                         UUID.fromString(request.param("identityId").orElseThrow())
                                                 )
-                                        )
-                )
-                .DELETE(
-                        "/api/v1/identities/delete/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
-                                        .body(
-                                                identityService
-                                                        .deleteAsync(UUID.fromString(request.param("identityId").orElseThrow()))
-                                                        .get()
                                         )
                 )
                 .PATCH(
@@ -125,25 +82,11 @@ public class IdentityRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
                                         .body(
-                                                identityService.changePassword(
+                                                this.identityService.changePassword(
                                                         UUID.fromString(request.param("identityId").orElseThrow()),
                                                         request.body(new ParameterizedTypeReference<>() {
                                                         })
                                                 )
-                                        )
-                )
-                .PATCH(
-                        "/api/v1/identities/change-password/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
-                                        .body(
-                                                identityService.changePasswordAsync(
-                                                                UUID.fromString(request.param("identityId").orElseThrow()),
-                                                                request.body(new ParameterizedTypeReference<>() {
-                                                                })
-                                                        )
-                                                        .get()
                                         )
                 )
                 .PATCH(
@@ -152,19 +95,7 @@ public class IdentityRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
                                         .body(
-                                                identityService.enableDisable(
-                                                        UUID.fromString(request.param("identityId").orElseThrow()),
-                                                        Boolean.parseBoolean(request.param("enable").orElseThrow())
-                                                )
-                                        )
-                )
-                .PATCH(
-                        "/api/v1/identities/enable-disable/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
-                                        .body(
-                                                identityService.enableDisableAsync(
+                                                this.identityService.enableDisable(
                                                         UUID.fromString(request.param("identityId").orElseThrow()),
                                                         Boolean.parseBoolean(request.param("enable").orElseThrow())
                                                 )
@@ -176,18 +107,7 @@ public class IdentityRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(
-                                                identityService.makeEmployee(
-                                                        UUID.fromString(request.param("identityId").orElseThrow())
-                                                )
-                                        )
-                )
-                .PUT(
-                        "/api/v1/identities/make-employee/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                identityService.makeEmployeeAsync(
+                                                this.identityService.makeEmployee(
                                                         UUID.fromString(request.param("identityId").orElseThrow())
                                                 )
                                         )
@@ -198,18 +118,7 @@ public class IdentityRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(
-                                                identityService.makeDirector(
-                                                        UUID.fromString(request.param("identityId").orElseThrow())
-                                                )
-                                        )
-                )
-                .PUT(
-                        "/api/v1/identities/make-director/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                identityService.makeDirectorAsync(
+                                                this.identityService.makeDirector(
                                                         UUID.fromString(request.param("identityId").orElseThrow())
                                                 )
                                         )
@@ -220,18 +129,7 @@ public class IdentityRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .body(
-                                                identityService.makeUser(
-                                                        UUID.fromString(request.param("identityId").orElseThrow())
-                                                )
-                                        )
-                )
-                .PUT(
-                        "/api/v1/identities/make-user/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .body(
-                                                identityService.makeUserAsync(
+                                                this.identityService.makeUser(
                                                         UUID.fromString(request.param("identityId").orElseThrow())
                                                 )
                                         )
@@ -242,23 +140,10 @@ public class IdentityRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
                                         .body(
-                                                identityService.uploadImage(
+                                                this.identityService.uploadImage(
                                                         UUID.fromString(request.param("identityId").orElseThrow()),
                                                         request.multipartData().getFirst("file")
                                                 )
-                                        )
-                )
-                .POST(
-                        "/api/v1/identities/upload-image/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
-                                        .body(
-                                                identityService.uploadImageAsync(
-                                                                UUID.fromString(request.param("identityId").orElseThrow()),
-                                                                request.multipartData().getFirst("file")
-                                                        )
-                                                        .get()
                                         )
                 )
                 .PUT(
@@ -267,23 +152,10 @@ public class IdentityRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
                                         .body(
-                                                identityService.changeImage(
+                                                this.identityService.changeImage(
                                                         UUID.fromString(request.param("identityId").orElseThrow()),
                                                         request.multipartData().getFirst("file")
                                                 )
-                                        )
-                )
-                .PUT(
-                        "/api/v1/identities/change-image/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
-                                        .body(
-                                                identityService.changeImageAsync(
-                                                                UUID.fromString(request.param("identityId").orElseThrow()),
-                                                                request.multipartData().getFirst("file")
-                                                        )
-                                                        .get()
                                         )
                 )
                 .DELETE(
@@ -292,21 +164,9 @@ public class IdentityRouter {
                                         .status(HttpStatus.OK)
                                         .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
                                         .body(
-                                                identityService.deleteImage(
+                                                this.identityService.deleteImage(
                                                         UUID.fromString(request.param("identityId").orElseThrow())
                                                 )
-                                        )
-                )
-                .DELETE(
-                        "/api/v1/identities/delete-image/async", request ->
-                                ServerResponse
-                                        .status(HttpStatus.OK)
-                                        .contentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
-                                        .body(
-                                                identityService.deleteImageAsync(
-                                                                UUID.fromString(request.param("identityId").orElseThrow())
-                                                        )
-                                                        .get()
                                         )
                 )
                 .onError(

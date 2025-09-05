@@ -7,7 +7,7 @@ import org.burgas.corporateservice.entity.Employee;
 import org.burgas.corporateservice.entity.Identity;
 import org.burgas.corporateservice.entity.OfficePK;
 import org.burgas.corporateservice.exception.*;
-import org.burgas.corporateservice.repository.CorporationRepository;
+import org.burgas.corporateservice.service.CorporationService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -28,13 +28,12 @@ import static org.burgas.corporateservice.message.IdentityMessages.IDENTITY_NOT_
 @RequiredArgsConstructor
 public class EmployeeFilterFunction implements HandlerFilterFunction<ServerResponse, ServerResponse> {
 
-    private final CorporationRepository corporationRepository;
+    private final CorporationService corporationService;
 
     @Override
     public @NotNull ServerResponse filter(@NotNull ServerRequest request, @NotNull HandlerFunction<ServerResponse> next) throws Exception {
         if (
-                request.path().equals("/api/v1/employees/create") || request.path().equals("/api/v1/employees/create/async") ||
-                request.path().equals("/api/v1/employees/update") || request.path().equals("/api/v1/employees/update/async")
+                request.path().equals("/api/v1/employees/create") || request.path().equals("/api/v1/employees/update")
         ) {
             Authentication authentication = request.principal()
                     .map(Authentication.class::cast)
@@ -46,8 +45,7 @@ public class EmployeeFilterFunction implements HandlerFilterFunction<ServerRespo
                 Identity identity = (Identity) authentication.getPrincipal();
 
                 if (identity.getId().equals(identityId)) {
-                    Corporation corporation = this.corporationRepository.findById(employeeRequest.getOffice().getCorporationId())
-                            .orElseThrow(() -> new CorporationNotFoundException(CORPORATION_NOT_FOUND.getMessage()));
+                    Corporation corporation = this.corporationService.findCorporation(employeeRequest.getOffice().getCorporationId());
 
                     if (corporation.getDirectors().contains(identity.getId())) {
                         request.attributes().put("employeeRequest", employeeRequest);
@@ -65,7 +63,9 @@ public class EmployeeFilterFunction implements HandlerFilterFunction<ServerRespo
                 throw new IdentityNotAuthenticatedException(IDENTITY_NOT_AUTHENTICATED.getMessage());
             }
 
-        } else if (request.path().equals("/api/v1/employees/delete") || request.path().equals("/api/v1/employees/delete/async")) {
+        } else if (
+                request.path().equals("/api/v1/employees/delete")
+        ) {
 
             Authentication authentication = request.principal()
                     .map(Authentication.class::cast)
@@ -88,7 +88,9 @@ public class EmployeeFilterFunction implements HandlerFilterFunction<ServerRespo
                 throw new IdentityNotAuthenticatedException(IDENTITY_NOT_AUTHENTICATED.getMessage());
             }
 
-        } else if (request.path().equals("/api/v1/employees/office-transfer") || request.path().equals("/api/v1/employees/office-transfer/async")) {
+        } else if (
+                request.path().equals("/api/v1/employees/office-transfer")
+        ) {
 
             Authentication authentication = request.principal()
                     .map(Authentication.class::cast)
@@ -107,8 +109,7 @@ public class EmployeeFilterFunction implements HandlerFilterFunction<ServerRespo
                     OfficePK officePK = request.body(OfficePK.class);
 
                     if (officePK.getCorporationId().equals(employee.getOffice().getOfficePK().getCorporationId())) {
-                        Corporation corporation = this.corporationRepository.findById(officePK.getCorporationId())
-                                .orElseThrow(() -> new CorporationNotFoundException(CORPORATION_NOT_FOUND.getMessage()));
+                        Corporation corporation = this.corporationService.findCorporation(officePK.getCorporationId());
 
                         if (employee.getId().equals(employeeId) || corporation.getDirectors().contains(identity.getId())) {
                             request.attributes().put("officePK", officePK);

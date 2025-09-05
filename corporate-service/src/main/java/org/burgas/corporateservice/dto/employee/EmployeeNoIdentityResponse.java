@@ -3,6 +3,7 @@ package org.burgas.corporateservice.dto.employee;
 import lombok.*;
 import org.burgas.corporateservice.dto.Response;
 import org.burgas.corporateservice.dto.office.OfficeWithoutEmployeesResponse;
+import org.burgas.corporateservice.dto.position.PositionWithoutEmployeeResponse;
 import org.burgas.corporateservice.entity.Address;
 
 import java.util.UUID;
@@ -12,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class EmployeeNoIdentityResponse extends Response {
+public final class EmployeeNoIdentityResponse extends Response {
 
     private UUID id;
     private String firstName;
@@ -20,5 +21,6 @@ public class EmployeeNoIdentityResponse extends Response {
     private String patronymic;
     private String about;
     private Address address;
+    private PositionWithoutEmployeeResponse position;
     private OfficeWithoutEmployeesResponse office;
 }

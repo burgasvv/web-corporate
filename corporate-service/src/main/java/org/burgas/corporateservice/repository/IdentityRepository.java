@@ -4,6 +4,8 @@ import org.burgas.corporateservice.entity.Identity;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,4 +25,11 @@ public interface IdentityRepository extends JpaRepository<Identity, UUID> {
 
     @EntityGraph(value = "identity-entity-graph", type = EntityGraph.EntityGraphType.FETCH)
     Optional<Identity> findIdentityByEmail(String email);
+
+    @Modifying
+    @Query(
+            nativeQuery = true,
+            value = "delete from identity i where i.id = :identityId"
+    )
+    void deleteIdentityById(UUID identityId);
 }

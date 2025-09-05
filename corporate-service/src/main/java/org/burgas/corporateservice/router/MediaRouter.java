@@ -1,5 +1,6 @@
 package org.burgas.corporateservice.router;
 
+import lombok.RequiredArgsConstructor;
 import org.burgas.corporateservice.entity.Media;
 import org.burgas.corporateservice.exception.MediaNotFoundException;
 import org.burgas.corporateservice.service.MediaService;
@@ -15,14 +16,17 @@ import org.springframework.web.servlet.function.ServerResponse;
 import java.util.UUID;
 
 @Configuration
+@RequiredArgsConstructor
 public class MediaRouter {
 
+    private final MediaService mediaService;
+
     @Bean
-    public RouterFunction<ServerResponse> mediaRoutes(final MediaService mediaService) {
+    public RouterFunction<ServerResponse> mediaRoutes() {
         return RouterFunctions.route()
                 .GET(
                         "/api/v1/media/by-id", request -> {
-                            Media media = mediaService.findById(UUID.fromString(request.param("mediaId").orElseThrow()));
+                            Media media = this.mediaService.findById(UUID.fromString(request.param("mediaId").orElseThrow()));
                             return ServerResponse
                                     .status(HttpStatus.OK)
                                     .contentType(MediaType.parseMediaType(media.getContentType()))

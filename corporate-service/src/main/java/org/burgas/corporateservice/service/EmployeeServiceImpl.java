@@ -3,9 +3,7 @@ package org.burgas.corporateservice.service;
 import lombok.RequiredArgsConstructor;
 import org.burgas.corporateservice.dto.employee.EmployeeRequest;
 import org.burgas.corporateservice.dto.employee.EmployeeWithOfficeResponse;
-import org.burgas.corporateservice.entity.Employee;
-import org.burgas.corporateservice.entity.Office;
-import org.burgas.corporateservice.entity.OfficePK;
+import org.burgas.corporateservice.entity.*;
 import org.burgas.corporateservice.exception.EmployeeNotFoundException;
 import org.burgas.corporateservice.exception.EmployeeOfficeMatchesException;
 import org.burgas.corporateservice.mapper.EmployeeMapper;
@@ -13,7 +11,6 @@ import org.burgas.corporateservice.message.EmployeeMessages;
 import org.burgas.corporateservice.repository.EmployeeRepository;
 import org.burgas.corporateservice.repository.OfficeRepository;
 import org.burgas.corporateservice.service.contract.EmployeeService;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -22,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static org.burgas.corporateservice.message.EmployeeMessages.*;
@@ -52,11 +48,6 @@ public class EmployeeServiceImpl implements EmployeeService<EmployeeRequest, Emp
                 .collect(Collectors.toList());
     }
 
-    @Async(value = "asyncExecutor")
-    public CompletableFuture<List<EmployeeWithOfficeResponse>> findByCorporationIdAsync(final UUID corporationId) {
-        return CompletableFuture.supplyAsync(() -> this.findByCorporationId(corporationId));
-    }
-
     @Override
     public List<EmployeeWithOfficeResponse> findByOffice(OfficePK officePK) {
         Office office = this.officeService.findOffice(officePK);
@@ -66,19 +57,9 @@ public class EmployeeServiceImpl implements EmployeeService<EmployeeRequest, Emp
                 .collect(Collectors.toList());
     }
 
-    @Async(value = "asyncExecutor")
-    public CompletableFuture<List<EmployeeWithOfficeResponse>> findByOfficeAsync(final OfficePK officePK) {
-        return CompletableFuture.supplyAsync(() -> this.findByOffice(officePK));
-    }
-
     @Override
     public EmployeeWithOfficeResponse findById(UUID employeeId) {
         return this.employeeMapper.toResponse(this.findEmployee(employeeId));
-    }
-
-    @Async(value = "asyncExecutor")
-    public CompletableFuture<EmployeeWithOfficeResponse> findByIdAsync(final UUID employeeId) {
-        return CompletableFuture.supplyAsync(() -> this.findById(employeeId));
     }
 
     @Override
@@ -92,17 +73,6 @@ public class EmployeeServiceImpl implements EmployeeService<EmployeeRequest, Emp
         );
     }
 
-    @Async(value = "asyncExecutor")
-    @Transactional(
-            isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED,
-            rollbackFor = Exception.class
-    )
-    public CompletableFuture<EmployeeWithOfficeResponse> createOrUpdateAsync(final EmployeeRequest employeeRequest) {
-        return CompletableFuture.supplyAsync(() -> this.employeeMapper.toEntity(employeeRequest))
-                .thenApplyAsync(this.employeeRepository::save)
-                .thenApplyAsync(this.employeeMapper::toResponse);
-    }
-
     @Override
     @Transactional(
             isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED,
@@ -110,17 +80,16 @@ public class EmployeeServiceImpl implements EmployeeService<EmployeeRequest, Emp
     )
     public String delete(UUID employeeId) {
         Employee employee = this.findEmployee(employeeId);
-        this.employeeRepository.delete(employee);
-        return EMPLOYEE_DELETED.getMessage();
-    }
 
-    @Async(value = "asyncExecutor")
-    @Transactional(
-            isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED,
-            rollbackFor = Exception.class
-    )
-    public CompletableFuture<String> deleteAsync(final UUID employeeId) {
-        return CompletableFuture.supplyAsync(() -> this.delete(employeeId));
+        Office office = employee.getOffice();
+        office.setEmployeesAmount(office.getEmployeesAmount() - 1);
+
+        Department department = employee.getPosition().getDepartment();
+        Corporation corporation = department.getCorporation();
+        corporation.setEmployeesAmount(corporation.getEmployeesAmount() - 1);
+
+        this.employeeRepository.deleteEmployeeById(employee.getId());
+        return EMPLOYEE_DELETED.getMessage();
     }
 
     @Transactional(
@@ -145,14 +114,5 @@ public class EmployeeServiceImpl implements EmployeeService<EmployeeRequest, Emp
         this.officeRepository.save(newOffice);
 
         return EMPLOYEE_TRANSFER.getMessage();
-    }
-
-    @Async(value = "asyncExecutor")
-    @Transactional(
-            isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
-            rollbackFor = Exception.class
-    )
-    public CompletableFuture<String> transferToAnotherOfficeAsync(final UUID employeeId, final OfficePK officePK) {
-        return CompletableFuture.supplyAsync(() -> this.transferToAnotherOffice(employeeId, officePK));
     }
 }

@@ -6,6 +6,7 @@ import org.burgas.corporateservice.dto.employee.EmployeeRequest;
 import org.burgas.corporateservice.dto.employee.EmployeeWithOfficeResponse;
 import org.burgas.corporateservice.dto.identity.IdentityWithoutEmployeeResponse;
 import org.burgas.corporateservice.dto.office.OfficeWithoutEmployeesResponse;
+import org.burgas.corporateservice.dto.position.PositionWithoutEmployeeResponse;
 import org.burgas.corporateservice.entity.*;
 import org.burgas.corporateservice.exception.CorporationNotFoundException;
 import org.burgas.corporateservice.exception.EntityFieldEmptyException;
@@ -35,6 +36,7 @@ public final class EmployeeMapper implements EntityMapper<EmployeeRequest, Emplo
     private final CorporationRepository corporationRepository;
     private final CorporationMapper corporationMapper;
     private final IdentityRepository identityRepository;
+    private final PositionRepository positionRepository;
 
     @Override
     public Employee toEntity(EmployeeRequest employeeRequest) {
@@ -43,32 +45,43 @@ public final class EmployeeMapper implements EntityMapper<EmployeeRequest, Emplo
                 .map(
                         employee -> {
                             Address newAddress = employeeRequest.getAddress();
+                            Address address = newAddress == null ? employee.getAddress() : this.addressRepository.save(newAddress);
                             OfficePK officePK = getOfficePK(employeeRequest);
+
+                            UUID identityId = this.handleData(
+                                    employeeRequest.getIdentityId(), UUID.nameUUIDFromBytes("0".getBytes(StandardCharsets.UTF_8))
+                            );
+                            Identity identity = this.handleData(
+                                    this.identityRepository.findById(identityId).orElse(null),
+                                    employee.getIdentity()
+                            );
+
+                            UUID positionId = this.handleData(
+                                    employeeRequest.getPositionId(), UUID.nameUUIDFromBytes("0".getBytes(StandardCharsets.UTF_8))
+                            );
+                            Position position = this.handleData(
+                                    this.positionRepository.findById(positionId).orElse(null),
+                                    employee.getPosition()
+                            );
+                            String firstName = this.handleData(employeeRequest.getFirstName(), employee.getFirstName());
+                            String lastName = this.handleData(employeeRequest.getLastName(), employee.getLastName());
+                            String patronymic = this.handleData(employeeRequest.getPatronymic(), employee.getPatronymic());
+                            String about = this.handleData(employeeRequest.getAbout(), employee.getAbout());
+                            Office office = this.handleData(
+                                    this.officeRepository.findById(officePK).orElse(null),
+                                    employee.getOffice()
+                            );
 
                             return Employee.builder()
                                     .id(employee.getId())
-                                    .identity(
-                                            this.handleData(
-                                                    this.identityRepository.findById(
-                                                            employeeRequest.getIdentityId() == null ?
-                                                                    UUID.nameUUIDFromBytes("0".getBytes(StandardCharsets.UTF_8)) :
-                                                                    employeeRequest.getIdentityId()
-                                                            )
-                                                            .orElse(null),
-                                                    employee.getIdentity()
-                                            )
-                                    )
-                                    .firstName(this.handleData(employeeRequest.getFirstName(), employee.getFirstName()))
-                                    .lastName(this.handleData(employeeRequest.getLastName(), employee.getLastName()))
-                                    .patronymic(this.handleData(employeeRequest.getPatronymic(), employee.getPatronymic()))
-                                    .about(this.handleData(employeeRequest.getAbout(), employee.getAbout()))
-                                    .address(newAddress == null ? employee.getAddress() : this.addressRepository.save(newAddress))
-                                    .office(
-                                            this.handleData(
-                                                    this.officeRepository.findById(officePK).orElse(null),
-                                                    employee.getOffice()
-                                            )
-                                    )
+                                    .identity(identity)
+                                    .position(position)
+                                    .firstName(firstName)
+                                    .lastName(lastName)
+                                    .patronymic(patronymic)
+                                    .about(about)
+                                    .address(address)
+                                    .office(office)
                                     .build();
                         }
                 )
@@ -77,6 +90,7 @@ public final class EmployeeMapper implements EntityMapper<EmployeeRequest, Emplo
                             Address address = employeeRequest.getAddress();
                             if (address != null) {
                                 address = this.addressRepository.save(address);
+                                address = this.handleDataThrowable(address, EMPLOYEE_ADDRESS_FIELD_EMPTY.getMessage());
 
                             } else {
                                 throw new EntityFieldEmptyException(EMPLOYEE_ADDRESS_FIELD_EMPTY.getMessage());
@@ -86,30 +100,39 @@ public final class EmployeeMapper implements EntityMapper<EmployeeRequest, Emplo
                             Corporation corporation = this.corporationRepository.findById(officePK.getCorporationId())
                                     .orElseThrow(() -> new CorporationNotFoundException(CORPORATION_NOT_FOUND.getMessage()));
                             corporation.setEmployeesAmount(corporation.getEmployeesAmount() + 1);
-                            this.corporationRepository.save(corporation);
 
                             Office office = this.officeRepository.findById(officePK)
                                     .orElseThrow(() -> new OfficeNotFoundException(OFFICE_NOT_FOUND.getMessage()));
                             office.setEmployeesAmount(office.getEmployeesAmount() + 1);
-                            office = this.officeRepository.save(office);
+
+                            UUID identityId = this.handleData(
+                                    employeeRequest.getIdentityId(), UUID.nameUUIDFromBytes("0".getBytes(StandardCharsets.UTF_8))
+                            );
+                            Identity identity = this.handleDataThrowable(
+                                    this.identityRepository.findById(identityId).orElse(null),
+                                    EMPLOYEE_IDENTITY_FIELD_EMPTY.getMessage()
+                            );
+
+                            UUID positionId = this.handleData(
+                                    employeeRequest.getPositionId(), UUID.nameUUIDFromBytes("0".getBytes(StandardCharsets.UTF_8))
+                            );
+                            Position position = this.handleDataThrowable(
+                                    this.positionRepository.findById(positionId).orElse(null),
+                                    EMPLOYEE_POSITION_FIELD_EMPTY.getMessage()
+                            );
+                            String firstName = this.handleDataThrowable(employeeRequest.getFirstName(), EMPLOYEE_FIRSTNAME_FIELD_EMPTY.getMessage());
+                            String lastName = this.handleDataThrowable(employeeRequest.getLastName(), EMPLOYEE_LASTNAME_FIELD_EMPTY.getMessage());
+                            String patronymic = this.handleDataThrowable(employeeRequest.getPatronymic(), EMPLOYEE_PATRONYMIC_FIELD_EMPTY.getMessage());
+                            String about = this.handleDataThrowable(employeeRequest.getAbout(), EMPLOYEE_ABOUT_FIELD_EMPTY.getMessage());
 
                             return Employee.builder()
-                                    .identity(
-                                            this.handleDataThrowable(
-                                                    this.identityRepository.findById(
-                                                                    employeeRequest.getIdentityId() == null ?
-                                                                            UUID.nameUUIDFromBytes("0".getBytes(StandardCharsets.UTF_8)) :
-                                                                            employeeRequest.getIdentityId()
-                                                            )
-                                                            .orElse(null),
-                                                    EMPLOYEE_IDENTITY_FIELD_EMPTY.getMessage()
-                                            )
-                                    )
-                                    .firstName(this.handleDataThrowable(employeeRequest.getFirstName(), EMPLOYEE_FIRSTNAME_FIELD_EMPTY.getMessage()))
-                                    .lastName(this.handleDataThrowable(employeeRequest.getLastName(), EMPLOYEE_LASTNAME_FIELD_EMPTY.getMessage()))
-                                    .patronymic(this.handleDataThrowable(employeeRequest.getPatronymic(), EMPLOYEE_PATRONYMIC_FIELD_EMPTY.getMessage()))
-                                    .about(this.handleDataThrowable(employeeRequest.getAbout(), EMPLOYEE_ABOUT_FIELD_EMPTY.getMessage()))
-                                    .address(this.handleDataThrowable(address, EMPLOYEE_ADDRESS_FIELD_EMPTY.getMessage()))
+                                    .identity(identity)
+                                    .position(position)
+                                    .firstName(firstName)
+                                    .lastName(lastName)
+                                    .patronymic(patronymic)
+                                    .about(about)
+                                    .address(address)
                                     .office(office)
                                     .build();
                         }
@@ -140,6 +163,7 @@ public final class EmployeeMapper implements EntityMapper<EmployeeRequest, Emplo
                         Optional.ofNullable(employee.getIdentity())
                                 .map(
                                         identity -> IdentityWithoutEmployeeResponse.builder()
+                                                .id(identity.getId())
                                                 .authority(identity.getAuthority())
                                                 .username(identity.getUsernameNotUserDetails())
                                                 .password(identity.getPassword())
@@ -156,6 +180,17 @@ public final class EmployeeMapper implements EntityMapper<EmployeeRequest, Emplo
                 .patronymic(employee.getPatronymic())
                 .about(employee.getAbout())
                 .address(employee.getAddress())
+                .position(
+                        Optional.ofNullable(employee.getPosition())
+                                .map(
+                                        position -> PositionWithoutEmployeeResponse.builder()
+                                                .id(position.getId())
+                                                .name(position.getName())
+                                                .description(position.getDescription())
+                                                .build()
+                                )
+                                .orElse(null)
+                )
                 .office(getOffice(employee))
                 .build();
     }
@@ -168,6 +203,17 @@ public final class EmployeeMapper implements EntityMapper<EmployeeRequest, Emplo
                 .patronymic(employee.getPatronymic())
                 .about(employee.getAbout())
                 .address(employee.getAddress())
+                .position(
+                        Optional.ofNullable(employee.getPosition())
+                                .map(
+                                        position -> PositionWithoutEmployeeResponse.builder()
+                                                .id(position.getId())
+                                                .name(position.getName())
+                                                .description(position.getDescription())
+                                                .build()
+                                )
+                                .orElse(null)
+                )
                 .office(getOffice(employee))
                 .build();
     }
@@ -179,7 +225,7 @@ public final class EmployeeMapper implements EntityMapper<EmployeeRequest, Emplo
                                 .address(this.addressRepository.findById(office.getOfficePK().getAddressId()).orElse(null))
                                 .corporation(
                                         this.corporationRepository.findById(office.getOfficePK().getCorporationId())
-                                                .map(this.corporationMapper::toResponse)
+                                                .map(this.corporationMapper::toCorporationWithoutOfficesResponse)
                                                 .orElse(null)
                                 )
                                 .build()

@@ -3,7 +3,7 @@ package org.burgas.corporateservice.service;
 import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import org.burgas.corporateservice.dto.corporation.CorporationRequest;
-import org.burgas.corporateservice.dto.corporation.CorporationResponse;
+import org.burgas.corporateservice.dto.corporation.CorporationWithOfficesResponse;
 import org.burgas.corporateservice.entity.Corporation;
 import org.burgas.corporateservice.entity.Media;
 import org.burgas.corporateservice.exception.CorporationNotFoundException;
@@ -12,7 +12,6 @@ import org.burgas.corporateservice.exception.WrongDirectorIdException;
 import org.burgas.corporateservice.mapper.CorporationMapper;
 import org.burgas.corporateservice.repository.CorporationRepository;
 import org.burgas.corporateservice.service.contract.CrudService;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -22,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static org.burgas.corporateservice.message.CorporationMessages.*;
@@ -31,7 +29,7 @@ import static org.burgas.corporateservice.message.MediaMessages.MEDIA_NOT_FOUND;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public class CorporationService implements CrudService<CorporationRequest, CorporationResponse> {
+public class CorporationService implements CrudService<CorporationRequest, CorporationWithOfficesResponse> {
 
     private final CorporationRepository corporationRepository;
     private final CorporationMapper corporationMapper;
@@ -43,55 +41,27 @@ public class CorporationService implements CrudService<CorporationRequest, Corpo
     }
 
     @Override
-    public List<CorporationResponse> findAll() {
+    public List<CorporationWithOfficesResponse> findAll() {
         return this.corporationRepository.findAll()
                 .stream()
                 .map(this.corporationMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-    @Async(value = "asyncExecutor")
-    public CompletableFuture<List<CorporationResponse>> findAllAsync() {
-        return CompletableFuture.supplyAsync(this.corporationRepository::findAll)
-                .thenApplyAsync(
-                        corporations -> corporations
-                                .stream()
-                                .map(this.corporationMapper::toResponse)
-                                .collect(Collectors.toList())
-                );
-    }
-
     @Override
-    public CorporationResponse findById(UUID uuid) {
+    public CorporationWithOfficesResponse findById(UUID uuid) {
         return this.corporationMapper.toResponse(this.findCorporation(uuid));
     }
 
-    @Async(value = "asyncExecutor")
-    public CompletableFuture<CorporationResponse> findByIdAsync(final UUID corporationId) {
-        return CompletableFuture.supplyAsync(() -> this.findCorporation(corporationId))
-                .thenApplyAsync(this.corporationMapper::toResponse);
-    }
-
     @Override
     @Transactional(
             isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class
     )
-    public CorporationResponse createOrUpdate(CorporationRequest corporationRequest) {
+    public CorporationWithOfficesResponse createOrUpdate(CorporationRequest corporationRequest) {
         return this.corporationMapper.toResponse(
                 this.corporationRepository.save(this.corporationMapper.toEntity(corporationRequest))
         );
-    }
-
-    @Async(value = "asyncExecutor")
-    @Transactional(
-            isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED,
-            rollbackFor = Exception.class
-    )
-    public CompletableFuture<CorporationResponse> createOrUpdateAsync(final CorporationRequest corporationRequest) {
-        return CompletableFuture.supplyAsync(() -> this.corporationMapper.toEntity(corporationRequest))
-                .thenApplyAsync(this.corporationRepository::save)
-                .thenApplyAsync(this.corporationMapper::toResponse);
     }
 
     @Override
@@ -101,17 +71,8 @@ public class CorporationService implements CrudService<CorporationRequest, Corpo
     )
     public String delete(UUID uuid) {
         Corporation corporation = this.findCorporation(uuid);
-        this.corporationRepository.delete(corporation);
+        this.corporationRepository.deleteCorporationById(corporation.getId());
         return CORPORATION_DELETED.getMessage();
-    }
-
-    @Async(value = "asyncExecutor")
-    @Transactional(
-            isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED,
-            rollbackFor = Exception.class
-    )
-    public CompletableFuture<String> deleteAsync(final UUID corporationId) {
-        return CompletableFuture.supplyAsync(() -> this.delete(corporationId));
     }
 
     @Transactional(
@@ -130,15 +91,6 @@ public class CorporationService implements CrudService<CorporationRequest, Corpo
         }
     }
 
-    @Async(value = "asyncExecutor")
-    @Transactional(
-            isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
-            rollbackFor = Exception.class
-    )
-    public CompletableFuture<String> addDirectorAsync(final UUID corporationId, final UUID alreadyDirectorId, final UUID newDirectorId) {
-        return CompletableFuture.supplyAsync(() -> this.addDirector(corporationId, alreadyDirectorId, newDirectorId));
-    }
-
     @Transactional(
             isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class
@@ -149,15 +101,6 @@ public class CorporationService implements CrudService<CorporationRequest, Corpo
         corporation.setImage(image);
         this.corporationRepository.save(corporation);
         return CORPORATION_IMAGE_UPLOADED.getMessage();
-    }
-
-    @Async(value = "asyncExecutor")
-    @Transactional(
-            isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
-            rollbackFor = Exception.class
-    )
-    public CompletableFuture<String> uploadImageAsync(final UUID corporationId, final Part file) {
-        return CompletableFuture.supplyAsync(() -> this.uploadImage(corporationId, file));
     }
 
     @Transactional(
@@ -176,15 +119,6 @@ public class CorporationService implements CrudService<CorporationRequest, Corpo
                 .orElseThrow(() -> new MediaNotFoundException(MEDIA_NOT_FOUND.getMessage()));
     }
 
-    @Async(value = "asyncExecutor")
-    @Transactional(
-            isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
-            rollbackFor = Exception.class
-    )
-    public CompletableFuture<String> changeImageAsync(final UUID corporationId, final Part file) {
-        return CompletableFuture.supplyAsync(() -> this.changeImage(corporationId, file));
-    }
-
     @Transactional(
             isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class
@@ -201,14 +135,5 @@ public class CorporationService implements CrudService<CorporationRequest, Corpo
                         }
                 )
                 .orElseThrow(() -> new MediaNotFoundException(MEDIA_NOT_FOUND.getMessage()));
-    }
-
-    @Async(value = "asyncExecutor")
-    @Transactional(
-            isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRED,
-            rollbackFor = Exception.class
-    )
-    public CompletableFuture<String> deleteImageAsync(final UUID corporationId) {
-        return CompletableFuture.supplyAsync(() -> this.deleteImage(corporationId));
     }
 }
