@@ -18,7 +18,7 @@ Accept: application/json
 Authorization: Basic admin@gmail.com admin
 
 ###
-GET /api/v1/identities/by-id?identityId=51d62f14-3b6a-42b7-b14c-e13462ed9181
+GET /api/v1/identities/by-id?identityId=2fd62d00-a511-43ac-91f3-b0a7672aa8d0
 Host: localhost:8765
 Accept: application/json
 Authorization: Basic admin@gmail.com admin

@@ -15,7 +15,7 @@ public class ProxyConfig {
                         "corporate-service",
                         predicateSpec -> predicateSpec
                                 .path("/api/v1/**")
-                                .uri("http://localhost:9000")
+                                .uri("http://corporate-service:9000")
                 )
                 .build();
     }

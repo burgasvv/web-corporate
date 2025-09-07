@@ -11,3 +11,26 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: corporate_service_db
       PGDATA: /var/lib/data/postgresql
+
+  corporate-service:
+    build:
+      context: corporate-service
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/corporate_service_db
+
+  proxy-server:
+    build:
+      context: proxy-server
+      dockerfile: Dockerfile
+    ports:
+      - "8765:8765"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - corporate-service
